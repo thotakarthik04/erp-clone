@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Student ERP</title>
+<style>
+  :root{
+    --orange-1:#f6685e;
+    --orange-2:#f9a23a;
+    --grad: linear-gradient(135deg, var(--orange-1) 0%, var(--orange-2) 100%);
+    --bg: #f4f4f6;
+    --card-bg:#ffffff;
+    --text-dark:#1d1d1f;
+    --text-grey:#6b6b6f;
+    --text-light-grey:#9a9a9e;
+    --green:#3fae4a;
+    --blue:#2bb6f6;
+    --header-dark:#2b2b2b;
+    --hero-bg:#eef0fb;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+  }
+
+  /* ===== Phone frame ===== */
+  .phone{
+    width:390px;
+    height:844px;
+    background:var(--bg);
+    border-radius:40px;
+    overflow:hidden;
+    position:relative;
+    box-shadow: 0 0 0 10px #111, 0 30px 60px rgba(0,0,0,.5);
+  }
+  .statusbar{
+    height:14px;
+    background:transparent;
+    position:relative;
+  }
+  .statusbar::after{
+    content:'';
+    position:absolute;
+    top:4px; right:24px;
+    width:8px;height:8px;
+    border-radius:50%;
+    background:#27c93f;
+  }
+
+  .screen{
+    position:absolute;
+    top:14px; left:0; right:0; bottom:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    background:var(--bg);
+    transform: translateX(0);
+    transition: transform .32s cubic-bezier(.4,0,.2,1);
+  }
+  .screen::-webkit-scrollbar{ display:none; }
+  .screen.slide-out-left{ transform: translateX(-100%); }
+  .screen.hidden{ display:none; }
+  .screen.slide-in{
+    transform: translateX(100%);
+  }
+
+  /* ===== Top Nav (Dashboard) ===== */
+  .topbar{
+    display:grid;
+    grid-template-columns: 32px 1fr 32px;
+    align-items:center;
+    padding:18px 20px 14px;
+    background:#fff;
+    position:sticky;
+    top:0;
+    z-index:5;
+    border-bottom:1px solid #ececec;
+  }
+  .topbar .title{
+    grid-column:2;
+    text-align:center;
+    font-size:22px;
+    font-weight:600;
+    color:var(--text-dark);
+    letter-spacing:.3px;
+  }
+  .bell{ grid-column:3; text-align:right; font-size:22px; color:#222; }
+
+  /* ===== Dashboard content ===== */
+  .content{ padding:16px; padding-bottom:40px; }
+
+  .profile-card{
+    background:var(--hero-bg);
+    border-radius:14px;
+    padding:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:14px;
+  }
+  .profile-info .name{ font-size:19px; font-weight:700; color:var(--text-dark); margin:0 0 6px; }
+  .profile-info .id{ font-size:14px; color:var(--text-grey); margin:0 0 6px; }
+  .profile-info .course{ font-size:14px; color:var(--text-grey); line-height:1.4; max-width:230px; margin:0; }
+  .avatar{
+    width:64px; height:64px; border-radius:50%;
+    object-fit:cover;
+    box-shadow: 0 0 0 3px #fff, 0 0 0 5px #d9defb;
+  }
+
+  .pill-row{ display:flex; gap:10px; margin-bottom:14px; }
+  .pill{
+    flex:1;
+    background:var(--grad);
+    border-radius:12px;
+    padding:14px 10px;
+    text-align:center;
+    color:#1d1d1d;
+    font-size:14.5px;
+    cursor:pointer;
+  }
+  .pill .big{ display:block; font-size:18px; font-weight:700; margin-top:4px; }
+
+  .timetable-card{
+    background:var(--grad);
+    border-radius:16px;
+    padding:6px;
+    margin-bottom:16px;
+  }
+  .tt-tabs{ display:flex; gap:0; padding:8px; }
+  .tt-tab{
+    flex:1;
+    text-align:center;
+    padding:11px 6px;
+    border-radius:10px;
+    font-size:14.5px;
+    font-weight:600;
+    cursor:pointer;
+    color:#3a2a1a;
+  }
+  .tt-tab.active{ background:#fff; color:var(--text-dark); }
+  .tt-tab.inactive{ color:#4a3520; }
+  .tt-empty{
+    text-align:center;
+    padding:34px 10px 26px;
+    font-size:17px;
+    color:#2c2410;
+    font-weight:500;
+  }
+
+  .stat-row{ display:flex; gap:10px; margin-bottom:16px; }
+  .stat-card{
+    flex:1;
+    background:#fff;
+    border-radius:14px;
+    padding:14px 8px 16px;
+    text-align:center;
+    box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  }
+  .ring{ width:84px; height:84px; margin:0 auto 8px; position:relative; }
+  .ring svg{ transform: rotate(-90deg); }
+  .ring .ring-label{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:600; color:var(--text-dark);
+  }
+  .stat-sub{ font-size:12.5px; color:var(--text-grey); margin:0; }
+  .stat-main{ font-size:13.5px; color:var(--text-dark); font-weight:600; margin:2px 0 0; }
+
+  .chart-card{
+    background:#fff;
+    border-radius:14px;
+    padding:18px 14px 14px;
+    margin-bottom:16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  }
+  .chart-area{ display:flex; height:200px; }
+  .y-axis-label{
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size:13px;
+    color:var(--text-grey);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:20px;
+    flex-shrink:0;
+  }
+  .chart-plot{
+    flex:1;
+    position:relative;
+    height:200px;
+    margin-left:8px;
+  }
+  .grid-line{
+    position:absolute; left:0; right:0; height:1px; background:#e7e7ea;
+  }
+  .bar-wrap{
+    position:absolute;
+    bottom:0;
+    left:50%;
+    transform: translateX(-50%);
+    width:120px;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+  }
+  .bar-track{
+    width:100%; height:100%;
+    background:#ececec;
+    border-radius:3px 3px 0 0;
+    position:relative;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    overflow:hidden;
+  }
+  .bar-fill{
+    width:100%;
+    background: linear-gradient(180deg, #f3b27e 0%, #ef9f63 100%);
+    display:flex; align-items:flex-start; justify-content:center;
+    padding-top:10px;
+    font-size:13.5px; font-weight:600; color:#3a2a1a;
+    box-sizing:border-box;
+  }
+  .chart-foot{ text-align:center; padding:14px 0 4px; }
+  .chart-foot .term{ font-size:13.5px; color:var(--text-grey); display:block; }
+  .chart-foot .label{ font-size:14.5px; color:var(--text-dark); font-weight:700; margin-top:2px; }
+
+  .drives-card{
+    background:var(--grad);
+    border-radius:16px;
+    padding:4px 4px 14px;
+  }
+  .drives-title{ font-size:19px; font-weight:700; color:var(--text-dark); padding:16px 18px 12px; }
+  .drive-item{
+    background:#fff;
+    border-radius:10px;
+    margin:0 10px 10px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-left:4px solid var(--orange-1);
+  }
+  .drive-item .lbl{ font-size:15px; color:var(--text-dark); }
+  .drive-item .val{
+    background:#eee;
+    border-radius:6px;
+    padding:6px 16px;
+    font-weight:700;
+    font-size:14.5px;
+    color:var(--text-dark);
+    min-width:30px;
+    text-align:center;
+  }
+
+  /* ===== Attendance screen ===== */
+  .att-header{
+    background:var(--header-dark);
+    padding:16px 16px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  .att-back{
+    position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    color:#fff; font-size:22px; cursor:pointer;
+    background:none; border:none;
+  }
+  .att-header .title{ color:#fff; font-size:19px; font-weight:500; }
+
+  .agg-bar{
+    background:#fff;
+    margin:14px 14px 12px;
+    border-radius:10px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .agg-bar .lbl{ font-size:15.5px; letter-spacing:.5px; color:var(--text-dark); font-weight:600; }
+  .agg-bar .val{
+    background:var(--grad);
+    border-radius:8px;
+    padding:8px 18px;
+    font-weight:700;
+    font-size:16px;
+    color:#1d1d1d;
+  }
+
+  .course-list{ padding:0 14px 30px; }
+  .course-card{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:14px;
+    padding:16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .course-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .course-name{ font-size:15.5px; color:var(--text-grey); line-height:1.35; max-width:230px; }
+  .course-name .cr{ color:var(--orange-1); font-weight:600; }
+  .group-tag{
+    background:var(--grad);
+    color:#3a2a1a;
+    font-size:13px;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:2px 10px 10px 10px;
+    text-align:right;
+    white-space:nowrap;
+  }
+  .course-divider{ border-top:1px solid #ececec; margin:8px 0 10px; }
+  .course-body{ display:flex; justify-content:space-between; align-items:center; }
+  .course-meta p{ margin:3px 0; font-size:14px; color:var(--text-grey); }
+  .mini-ring{ width:78px; height:78px; position:relative; flex-shrink:0; }
+  .mini-ring svg{ transform: rotate(-90deg); }
+  .mini-ring .pct{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:600; color:var(--text-dark);
+  }
+  .course-foot{ display:flex; justify-content:space-between; margin-top:10px; }
+  .course-foot span{ font-size:13.5px; color:var(--orange-1); font-weight:600; }
+
+</style>
+  <script src="config.js"></script>
+</head>
+<body>
+
+<div class="phone">
+  <div class="statusbar"></div>
+
+  <!-- ============ DASHBOARD SCREEN ============ -->
+  <div class="screen" id="dashboardScreen">
+    <div class="topbar">
+      <div class="title">Dashboard</div>
+      <div class="bell">&#128276;</div>
+    </div>
+
+    <div class="content">
+
+      <div class="profile-card">
+        <div class="profile-info">
+          <p class="name" id="profileName">Loading...</p>
+          <p class="id" id="profileId"></p>
+          <p class="course" id="profileCourse"></p>
+        </div>
+        <img class="avatar" id="profileAvatar" src="" alt="profile" />
+      </div>
+
+      <div class="pill-row">
+        <div class="pill">Fee Balance<span class="big" id="feeBalance">Nil</span></div>
+        <div class="pill" style="display:flex;align-items:center;justify-content:center;"><span id="calendarLabel">Academic Calendar</span></div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="ring" data-pct="81.5" data-color="green"></div>
+          <p class="stat-sub">(Out of 10)</p>
+          <p class="stat-main">CGPA</p>
+        </div>
+        <div class="stat-card">
+          <div class="ring" data-pct="81.5" data-color="green"></div>
+          <p class="stat-sub">(Overall)</p>
+          <p class="stat-main">Percentage</p>
+        </div>
+        <div class="stat-card" id="attendanceTile" style="cursor:pointer;">
+          <div class="ring" data-pct="92" data-color="green"></div>
+          <p class="stat-sub">(Satisfactory)</p>
+          <p class="stat-main">Attendance</p>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-area">
+          <div class="y-axis-label">Percentage</div>
+          <div class="chart-plot" id="chartPlot">
+            <div class="bar-wrap">
+              <div class="bar-track">
+                <div class="bar-fill" id="resultBar">81.5%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-foot">
+          <span class="term">Term I</span>
+          <span class="label">Result Terms</span>
+        </div>
+      </div>
+
+      <div class="drives-card">
+        <div class="drives-title">Placement Drives:</div>
+        <div class="drive-item"><span class="lbl">Upcoming Drives</span><span class="val">0</span></div>
+        <div class="drive-item"><span class="lbl">Recent Drives</span><span class="val">0</span></div>
+        <div class="drive-item"><span class="lbl">Selected</span><span class="val">0</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ ATTENDANCE SCREEN ============ -->
+  <div class="screen hidden" id="attendanceScreen">
+    <div class="att-header">
+      <button class="att-back" id="backBtn">&#8592;</button>
+      <div class="title">Attendance</div>
+    </div>
+
+    <div class="agg-bar">
+      <span class="lbl">AGGREGATE&nbsp;&nbsp;ATTENDANCE</span>
+      <span class="val">92%</span>
+    </div>
+
+    <div class="course-list" id="courseList"></div>
+  </div>
+
+</div>
+
+  <script>
+  // Fetch data from backend API (configured in config.js) and populate UI
+  const chartPlot = document.getElementById('chartPlot');
+  const resultBar = document.getElementById('resultBar');
+
+  function buildRing(el){
+    const pct = parseFloat(el.dataset.pct) || 0;
+    const size = el.classList.contains('mini-ring') ? 78 : 84;
+    const stroke = 7;
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const offset = c - (pct/100) * c;
+    el.innerHTML = `
+      <svg width="${size}" height="${size}">
+        <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#e9e9ec" stroke-width="${stroke}" fill="none"/>
+        <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#3fae4a" stroke-width="${stroke}" fill="none"
+          stroke-linecap="round"
+          stroke-dasharray="${c}" stroke-dashoffset="${c}">
+          <animate attributeName="stroke-dashoffset" from="${c}" to="${offset}" dur=".9s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1"/>
+        </circle>
+      </svg>
+      <div class="ring-label">${pct % 1 === 0 ? pct : pct.toFixed(1)}%</div>
+    `;
+  }
+
+  async function loadData(){
+    try{
+      const [profileRes, statsRes, drivesRes, coursesRes] = await Promise.all([
+        fetch(CONFIG.API_BASE_URL + '/api/profile'),
+        fetch(CONFIG.API_BASE_URL + '/api/stats'),
+        fetch(CONFIG.API_BASE_URL + '/api/drives'),
+        fetch(CONFIG.API_BASE_URL + '/api/courses')
+      ]);
+      const profile = profileRes.ok ? await profileRes.json() : null;
+      const stats = statsRes.ok ? await statsRes.json() : null;
+      const drives = drivesRes.ok ? await drivesRes.json() : null;
+      const courses = coursesRes.ok ? await coursesRes.json() : [];
+
+      if(profile){
+        document.querySelector('.profile-info .name').textContent = profile.name || '';
+        document.querySelector('.profile-info .id').textContent = profile.id || '';
+        document.querySelector('.profile-info .course').textContent = profile.course || '';
+        const avatar = document.querySelector('.avatar');
+        if(profile.avatar) avatar.src = profile.avatar;
+      }
+
+      if(stats){
+        const resultPct = stats.percentage || stats.cgpa || 0;
+        resultBar.style.height = resultPct + '%';
+        // update rings: first two are assumed percentage/cgpa, third is attendance
+        const rings = document.querySelectorAll('.ring');
+        if(rings[0]){ rings[0].dataset.pct = stats.cgpa || resultPct; buildRing(rings[0]); }
+        if(rings[1]){ rings[1].dataset.pct = stats.percentage || resultPct; buildRing(rings[1]); }
+        if(rings[2]){ rings[2].dataset.pct = stats.attendance || 0; buildRing(rings[2]); }
+        // update agg attendance label
+        const agg = document.querySelector('.agg-bar .val');
+        if(agg) agg.textContent = (stats.attendance || 0) + '%';
+        // update fee pill
+        const pills = document.querySelectorAll('.pill');
+        if(pills[0]) pills[0].querySelector('.big') ? pills[0].querySelector('.big').textContent = stats.feeBalance || 'Nil' : null;
+      }
+
+      if(drives){
+        const drivesCard = document.querySelector('.drives-card');
+        if(drivesCard){
+          const vals = drivesCard.querySelectorAll('.val');
+          if(vals.length>=3){ vals[0].textContent = drives.upcoming ?? 0; vals[1].textContent = drives.recent ?? 0; vals[2].textContent = drives.selected ?? 0; }
+        }
+      }
+
+      const list = document.getElementById('courseList');
+      list.innerHTML = (courses || []).map((c,i) => `
+        <div class="course-card">
+          <div class="course-top">
+            <div class="course-name">${c.code} - ${c.name} <span class="cr">${c.cr||''}</span></div>
+            <div class="group-tag">Group:<br/>${c.group||''}</div>
+          </div>
+          <div class="course-divider"></div>
+          <div class="course-body">
+            <div class="course-meta">
+              <p>Faculty:</p>
+              <p>Faculty Seating: NA</p>
+              <p>Last Attended: ${c.last||''}</p>
+              <p>Attended/Delivered: ${c.ad||''}</p>
+              <p>Duty Leaves: ${c.duty||''}</p>
+            </div>
+            <div class="mini-ring" data-pct="${c.pct||0}" id="mini-${i}"></div>
+          </div>
+          <div class="course-foot">
+            <span>Section:${c.section||''}</span>
+            <span>Roll No: ${c.roll||''}</span>
+          </div>
+        </div>
+      `).join('');
+
+      (courses || []).forEach((c,i) => {
+        const el = document.getElementById(`mini-${i}`);
+        if(el){ el.classList.add('mini-ring'); buildRing(el); }
+      });
+
+    }catch(err){
+      console.warn('Failed to load API data', err);
+    }
+  }
+
+  // Navigation (unchanged)
+  const dashboardScreen = document.getElementById('dashboardScreen');
+  const attendanceScreen = document.getElementById('attendanceScreen');
+
+  document.getElementById('attendanceTile').addEventListener('click', () => {
+    attendanceScreen.classList.remove('hidden');
+    attendanceScreen.scrollTop = 0;
+    requestAnimationFrame(() => {
+      attendanceScreen.style.transition = 'none';
+      attendanceScreen.style.transform = 'translateX(100%)';
+      requestAnimationFrame(() => {
+        attendanceScreen.style.transition = 'transform .32s cubic-bezier(.4,0,.2,1)';
+        attendanceScreen.style.transform = 'translateX(0)';
+      });
+    });
+    dashboardScreen.style.transform = 'translateX(-30%)';
+  });
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    attendanceScreen.style.transform = 'translateX(100%)';
+    dashboardScreen.style.transform = 'translateX(0)';
+    setTimeout(() => attendanceScreen.classList.add('hidden'), 320);
+  });
+
+  // build initial gridlines (after paint)
+  requestAnimationFrame(()=>{
+    const plotHeight = chartPlot.clientHeight;
+    const gridCount = 5;
+    for (let i = 0; i <= gridCount; i++) {
+      const line = document.createElement('div');
+      line.className = 'grid-line';
+      line.style.top = (plotHeight / gridCount) * i + 'px';
+      chartPlot.insertBefore(line, chartPlot.firstChild);
+    }
+  });
+
+  loadData();
+
+</script>
+
+</body>
+</html>
