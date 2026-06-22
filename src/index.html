@@ -361,96 +361,58 @@
 }
 
 /* =========================
-   LOGIN SCREEN
+   LPU LOGIN SCREEN
 ========================= */
 
 .login-screen{
   position:absolute;
   inset:0;
-  background:#f4f4f6;
   z-index:9999;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-.login-container{
-  width:85%;
-  text-align:center;
-}
-
-.login-logo{
-  width:100px;
-  margin-bottom:25px;
-}
-
-.login-input{
-  width:100%;
-  padding:14px;
-  margin-bottom:14px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-}
-
-.login-btn{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  background:linear-gradient(
-      135deg,
-      #f6685e 0%,
-      #f9a23a 100%
-  );
-  color:#fff;
-  font-size:16px;
-  font-weight:600;
-  cursor:pointer;
-}
-.login-screen{
-  display:flex;
-  justify-content:center;
+  overflow-y:auto;
+  background:#fff;
 }
 
 .login-bg{
   min-height:100vh;
-  background:linear-gradient(
+  padding-top:40px;
+  background:
+  linear-gradient(
     180deg,
-    #f88478 0%,
-    #f8d77c 50%,
-    #ffffff 100%
+    #f58a7a 0%,
+    #f6d27a 25%,
+    #ffffff 60%
   );
 }
 
 .login-logo{
-  width:180px;
   display:block;
-  margin:10px auto 30px;
+  width:300px;
+  margin:20px auto 120px;
 }
 
 .login-form{
+  width:88%;
   max-width:420px;
   margin:auto;
-  background:white;
-  padding:25px;
-  border-radius:20px;
-  box-shadow:0 8px 20px rgba(0,0,0,.1);
 }
 
 .input-box{
   display:flex;
   align-items:center;
+  height:62px;
   background:#fff;
+  border:1px solid #bdbdbd;
   border-radius:14px;
-  padding:0 14px;
-  margin-bottom:16px;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
+  margin-bottom:22px;
+  overflow:hidden;
 }
 
 .input-icon{
-  font-size:20px;
-  margin-right:10px;
+  width:60px;
+  text-align:center;
+  font-size:22px;
+  color:#ff8f7c;
+  border-right:1px solid #f0c4c4;
 }
 
 .login-input{
@@ -458,63 +420,57 @@
   border:none;
   outline:none;
   background:none;
-  height:56px;
-  font-size:16px;
+  height:100%;
+  padding:0 15px;
+  font-size:18px;
 }
 
 .login-btn{
   width:100%;
+  height:60px;
   border:none;
-  color:#fff;
-  font-size:18px;
-  font-weight:600;
-  padding:16px;
-  border-radius:12px;
+  border-radius:8px;
+  margin-top:10px;
   cursor:pointer;
-  background:linear-gradient(
+
+  background:
+  linear-gradient(
     90deg,
-    #f56b62,
-    #f8b53d
+    #f68173,
+    #f6d06e
   );
+
+  font-size:20px;
+  color:#333;
+  font-weight:500;
+
+  box-shadow:
+  0 8px 12px rgba(0,0,0,.25);
 }
 
 .login-links{
   display:flex;
-  gap:10px;
-  margin-top:12px;
+  justify-content:space-between;
+  margin-top:16px;
 }
 
 .mini-btn{
-  flex:1;
-  border:1px solid #ddd;
+  width:46%;
+  height:42px;
   background:#fff;
-  border-radius:8px;
-  padding:10px;
-  font-size:13px;
+  border:1px solid #d7d7d7;
+  border-radius:4px;
+  font-size:14px;
 }
 
 .naac-section{
+  margin-top:90px;
   text-align:center;
-  margin-top:60px;
 }
 
-.naac-section h2{
-  font-size:24px;
-  margin-bottom:20px;
-}
-
-.naac-grade{
-  font-size:72px;
-  font-weight:900;
-  letter-spacing:2px;
-}
-
-.naac-grade span{
-  color:#f7b500;
-}
-
-.naac-section p{
-  font-weight:600;
+.naac-img{
+  width:95%;
+  max-width:450px;
 }
 </style>
   <script src="config.js"></script>
@@ -530,7 +486,7 @@
 
   <div class="login-bg">
 
-    <img src="/images/logo.png.avif" class="login-logo" alt="LPU Logo">
+    <img src="/images/logo.png" class="login-logo" alt="LPU Logo">
 
     <div class="login-form">
 
@@ -566,24 +522,11 @@
         <button class="mini-btn">Guest User</button>
       </div>
 
-      <div class="naac-section">
-        <h2>LPU RECEIVES HIGHEST GRADE</h2>
-
-        <div class="naac-grade">
-          NAAC <span>A++</span>
-        </div>
-
-        <p>
-          WITH 3.68 SCORE ON 4 POINT SCALE
-        </p>
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-  </div>
+<div class="naac-section">
+  <img
+    src="/images/naac.png"
+    class="naac-img"
+    alt="NAAC">
 </div>
 <div class="phone">
   <div class="statusbar"></div>
