@@ -209,7 +209,7 @@
     left:50%;
     transform: translateX(-50%);
     width:120px;
-    height:100%;
+    min-height:100%;
     display:flex;
     flex-direction:column;
     justify-content:flex-end;
@@ -361,52 +361,117 @@
 }
 
 /* =========================
-   LOGIN SCREEN
+   LPU LOGIN SCREEN
 ========================= */
 
 .login-screen{
   position:absolute;
-  inset:0;
-  background:#f4f4f6;
+  top:14px;
+  left:0;
+  right:0;
+  bottom:0;
+  background:#fff;
+  overflow-y:auto;
+  overflow-x:hidden;
   z-index:9999;
-  display:flex;
-  justify-content:center;
-  align-items:center;
 }
-
-.login-container{
-  width:85%;
-  text-align:center;
+.login-bg{
+  height:100%;
+  background:linear-gradient(
+    180deg,
+    #f58a7a 0%,
+    #f6d27a 25%,
+    #ffffff 60%
+  );
 }
 
 .login-logo{
-  width:100px;
-  margin-bottom:25px;
+  display:block;
+  width:260px;
+  margin:20px auto 120px;
+}
+
+.login-form{
+  width:88%;
+  max-width:420px;
+  margin:auto;
+}
+
+.input-box{
+  display:flex;
+  align-items:center;
+  height:62px;
+  background:#fff;
+  border:1px solid #bdbdbd;
+  border-radius:14px;
+  margin-bottom:22px;
+  overflow:hidden;
+}
+
+.input-icon{
+  width:60px;
+  text-align:center;
+  font-size:22px;
+  color:#ff8f7c;
+  border-right:1px solid #f0c4c4;
 }
 
 .login-input{
-  width:100%;
-  padding:14px;
-  margin-bottom:14px;
+  flex:1;
   border:none;
-  border-radius:10px;
-  font-size:16px;
+  outline:none;
+  background:none;
+  height:100%;
+  padding:0 15px;
+  font-size:18px;
 }
 
 .login-btn{
   width:100%;
-  padding:14px;
+  height: 64px;
   border:none;
-  border-radius:10px;
-  background:linear-gradient(
-      135deg,
-      #f6685e 0%,
-      #f9a23a 100%
-  );
-  color:#fff;
-  font-size:16px;
-  font-weight:600;
+  border-radius:8px;
+  margin-top:10px;
   cursor:pointer;
+
+  background:
+  linear-gradient(
+    90deg,
+    #f68173,
+    #f6d06e
+  );
+
+  font-size:22px;
+  color:#333;
+  font-weight:500;
+
+  box-shadow:
+  0 8px 12px rgba(0,0,0,.25);
+}
+
+.login-links{
+  display:flex;
+  justify-content:space-between;
+  margin-top:16px;
+}
+
+.mini-btn{
+  width:46%;
+  height:42px;
+  background:#fff;
+  border:1px solid #d7d7d7;
+  border-radius:4px;
+  font-size:14px;
+}
+
+.naac-section{
+  margin-top:90px;
+  text-align:center;
+}
+
+.naac-img{
+  width:95%;
+  max-width:450px;
 }
 </style>
   <script src="config.js"></script>
@@ -416,38 +481,62 @@
 <div id="splashScreen" class="splash-screen">
   <img src="/images/logo.png" class="splash-logo" alt="Logo">
 </div>
-
-<!-- LOGIN SCREEN -->
-<div id="loginScreen" class="login-screen" style="display:none;">
-  <div class="login-container">
-
-    <img src="/images/logo.png" class="login-logo" alt="Logo">
-
-    <h2>Student ERP</h2>
-
-    <input
-      type="text"
-      id="studentId"
-      placeholder="Student ID"
-      class="login-input">
-
-    <input
-      type="password"
-      id="password"
-      placeholder="Password"
-      class="login-input">
-
-    <button id="loginBtn" class="login-btn">
-      Sign In
-    </button>
-
-  </div>
-</div>
 <div class="phone">
   <div class="statusbar"></div>
 
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen" style="display:none;">
+
+  <div class="login-bg">
+
+    <img src="/images/logo.png" class="login-logo" alt="LPU Logo">
+
+    <div class="login-form">
+
+      <div class="input-box">
+        <span class="input-icon">👤</span>
+        <input
+          type="text"
+          id="studentId"
+          placeholder="Student ID"
+          class="login-input">
+      </div>
+
+      <div class="input-box">
+        <span class="input-icon">🔒</span>
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          class="login-input">
+      </div>
+
+      <button id="loginBtn" class="login-btn">
+        Sign In →
+      </button>
+
+      <div class="login-links">
+        <button class="mini-btn">Register New Number</button>
+        <button class="mini-btn">Login With OTP</button>
+      </div>
+
+      <div class="login-links">
+        <button class="mini-btn">Forgot Password ?</button>
+        <button class="mini-btn">Guest User</button>
+      </div>
+
+<div class="naac-section">
+  <img
+    src="/images/naac.png"
+    class="naac-img"
+    alt="NAAC">
+</div>
+
+</div>
+</div>
+
   <!-- ============ DASHBOARD SCREEN ============ -->
-  <div class="screen" id="dashboardScreen">
+  <div class="screen" id="dashboardScreen" style="display:none;">
     <div class="topbar">
       <div class="title">Dashboard</div>
       <div class="bell">&#128276;</div>
@@ -677,6 +766,7 @@
 
 function showDashboard(){
   document.getElementById("loginScreen").style.display="none";
+  document.getElementById("dashboardScreen").style.display="block";
   loadData();
 }
 
@@ -692,7 +782,8 @@ window.addEventListener("load",()=>{
     if(loggedIn==="true"){
       showDashboard();
     }else{
-      document.getElementById("loginScreen").style.display="flex";
+      document.getElementById("loginScreen").style.display="block";
+      document.getElementById("dashboardScreen").style.display="none";
     }
 
   },3000);
