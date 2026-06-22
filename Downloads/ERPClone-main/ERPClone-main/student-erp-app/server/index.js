@@ -48,13 +48,13 @@ async function getStudent() {
     );
 
     if (!result.Items || result.Items.length === 0) {
-      return null;
+      return readDB();
     }
 
     return result.Items[0];
   } catch (err) {
     console.error("DynamoDB Error:", err);
-    return null;
+    return readDB();
   }
 }
 
@@ -109,6 +109,14 @@ app.get("/api/courses", async (req, res) => {
   const student = await getStudent();
 
   res.json(student?.courses || []);
+});
+
+// Results and semester details
+app.get("/api/results", async (req, res) => {
+  const student = await getStudent();
+  const local = readDB();
+
+  res.json(student?.results || local.results || {});
 });
 
 // -----------------------------------
