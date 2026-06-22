@@ -334,12 +334,115 @@
   }
   .course-foot{ display:flex; justify-content:space-between; margin-top:10px; }
   .course-foot span{ font-size:13.5px; color:var(--orange-1); font-weight:600; }
+/* =========================
+   SPLASH SCREEN
+========================= */
 
+.splash-screen{
+  position:fixed;
+  inset:0;
+  background:#9e9e9e;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:99999;
+}
+
+.splash-logo{
+  width:110px;
+  height:110px;
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.1);}
+  100%{transform:scale(1);}
+}
+
+/* =========================
+   LOGIN SCREEN
+========================= */
+
+.login-screen{
+  position:absolute;
+  inset:0;
+  background:#f4f4f6;
+  z-index:9999;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-container{
+  width:85%;
+  text-align:center;
+}
+
+.login-logo{
+  width:100px;
+  margin-bottom:25px;
+}
+
+.login-input{
+  width:100%;
+  padding:14px;
+  margin-bottom:14px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+}
+
+.login-btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(
+      135deg,
+      #f6685e 0%,
+      #f9a23a 100%
+  );
+  color:#fff;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+}
 </style>
   <script src="config.js"></script>
 </head>
 <body>
+<!-- SPLASH SCREEN -->
+<div id="splashScreen" class="splash-screen">
+  <img src="/images/logo.png" class="splash-logo" alt="Logo">
+</div>
 
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen" style="display:none;">
+  <div class="login-container">
+
+    <img src="/images/logo.png" class="login-logo" alt="Logo">
+
+    <h2>Student ERP</h2>
+
+    <input
+      type="text"
+      id="studentId"
+      placeholder="Student ID"
+      class="login-input">
+
+    <input
+      type="password"
+      id="password"
+      placeholder="Password"
+      class="login-input">
+
+    <button id="loginBtn" class="login-btn">
+      Sign In
+    </button>
+
+  </div>
+</div>
 <div class="phone">
   <div class="statusbar"></div>
 
@@ -568,8 +671,66 @@
       chartPlot.insertBefore(line, chartPlot.firstChild);
     }
   });
+/* =========================
+   LOGIN SYSTEM
+========================= */
 
+function showDashboard(){
+  document.getElementById("loginScreen").style.display="none";
   loadData();
+}
+
+window.addEventListener("load",()=>{
+
+  setTimeout(()=>{
+
+    document.getElementById("splashScreen").style.display="none";
+
+    const loggedIn =
+      localStorage.getItem("loggedIn");
+
+    if(loggedIn==="true"){
+      showDashboard();
+    }else{
+      document.getElementById("loginScreen").style.display="flex";
+    }
+
+  },3000);
+
+});
+
+document
+.getElementById("loginBtn")
+.addEventListener("click",()=>{
+
+  const id =
+    document.getElementById("studentId").value;
+
+  const pass =
+    document.getElementById("password").value;
+
+  if(
+    id==="12518549" &&
+    pass==="123456"
+  ){
+
+    localStorage.setItem(
+      "loggedIn",
+      "true"
+    );
+
+    showDashboard();
+
+  }else{
+
+    alert(
+      "Invalid Student ID or Password"
+    );
+
+  }
+
+});
+  //loadData();
 
 </script>
 
