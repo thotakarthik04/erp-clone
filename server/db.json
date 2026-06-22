@@ -6,10 +6,40 @@
     "avatar": "https://i.pravatar.cc/120?img=47"
   },
   "stats": {
-    "attendance": 95,
-    "cgpa": 9.2,
-    "percentage": 92,
+    "attendance": 92,
+    "cgpa": 8.15,
+    "percentage": 81.5,
     "feeBalance": "Nil"
+  },
+  "results": {
+    "overall": {
+      "cgpa": 8.15,
+      "percentage": 81.5
+    },
+    "semesters": [
+      {
+        "name": "Semester 1",
+        "cgpa": 8.15,
+        "percentage": 81.5,
+        "subjects": [
+          { "name": "Cyber Security Fundamentals", "code": "CSE316", "credits": 4, "marks": 91, "grade": "A+" },
+          { "name": "Computer Networks", "code": "CSE312", "credits": 4, "marks": 86, "grade": "A" },
+          { "name": "Operating Systems", "code": "CSE314", "credits": 4, "marks": 78, "grade": "B+" },
+          { "name": "Digital Forensics", "code": "CSE318", "credits": 3, "marks": 88, "grade": "A" }
+        ]
+      },
+      {
+        "name": "Semester 2",
+        "cgpa": 8.32,
+        "percentage": 83.2,
+        "subjects": [
+          { "name": "Network Security", "code": "CSE321", "credits": 4, "marks": 89, "grade": "A" },
+          { "name": "Ethical Hacking", "code": "CSE323", "credits": 4, "marks": 93, "grade": "A+" },
+          { "name": "Cloud Computing", "code": "CSE325", "credits": 3, "marks": 82, "grade": "A" },
+          { "name": "Cryptography", "code": "CSE327", "credits": 4, "marks": 79, "grade": "B+" }
+        ]
+      }
+    ]
   },
   "drives": {
     "upcoming": 0,
