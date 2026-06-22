@@ -532,9 +532,11 @@
     alt="NAAC">
 </div>
 
+</div>
+</div>
 
   <!-- ============ DASHBOARD SCREEN ============ -->
-  <div class="screen" id="dashboardScreen">
+  <div class="screen" id="dashboardScreen" style="display:none;">
     <div class="topbar">
       <div class="title">Dashboard</div>
       <div class="bell">&#128276;</div>
@@ -764,6 +766,7 @@
 
 function showDashboard(){
   document.getElementById("loginScreen").style.display="none";
+  document.getElementById("dashboardScreen").style.display="block";
   loadData();
 }
 
@@ -779,7 +782,8 @@ window.addEventListener("load",()=>{
     if(loggedIn==="true"){
       showDashboard();
     }else{
-      document.getElementById("loginScreen").style.display="flex";
+      document.getElementById("loginScreen").style.display="block";
+      document.getElementById("dashboardScreen").style.display="none";
     }
 
   },3000);
