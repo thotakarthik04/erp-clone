@@ -1,0 +1,129 @@
+{
+  "profile": {
+    "name": "Ayushi Sharma",
+    "id": "12513537",
+    "course": "P132-HNY:B.Tech. (Hons.) (CSE - Applied AI)(2025)",
+    "avatar": "https://i.pravatar.cc/120?img=47"
+  },
+  "stats": {
+    "attendance": 92,
+    "cgpa": 8.15,
+    "percentage": 81.5,
+    "feeBalance": "Nil"
+  },
+  "results": {
+    "overall": {
+      "cgpa": 8.15,
+      "percentage": 81.5
+    },
+    "semesters": [
+      {
+        "name": "Semester 1",
+        "cgpa": 8.15,
+        "percentage": 81.5,
+        "subjects": [
+          { "name": "Cyber Security Fundamentals", "code": "CSE316", "credits": 4, "marks": 91, "grade": "A+" },
+          { "name": "Computer Networks", "code": "CSE312", "credits": 4, "marks": 86, "grade": "A" },
+          { "name": "Operating Systems", "code": "CSE314", "credits": 4, "marks": 78, "grade": "B+" },
+          { "name": "Digital Forensics", "code": "CSE318", "credits": 3, "marks": 88, "grade": "A" }
+        ]
+      },
+      {
+        "name": "Semester 2",
+        "cgpa": 8.32,
+        "percentage": 83.2,
+        "subjects": [
+          { "name": "Network Security", "code": "CSE321", "credits": 4, "marks": 89, "grade": "A" },
+          { "name": "Ethical Hacking", "code": "CSE323", "credits": 4, "marks": 93, "grade": "A+" },
+          { "name": "Cloud Computing", "code": "CSE325", "credits": 3, "marks": 82, "grade": "A" },
+          { "name": "Cryptography", "code": "CSE327", "credits": 4, "marks": 79, "grade": "B+" }
+        ]
+      }
+    ]
+  },
+  "drives": {
+    "upcoming": 0,
+    "recent": 0,
+    "selected": 0
+  },
+  "courses": [
+    {
+      "id": 1,
+      "code": "CSE235",
+      "name": "BREADTH OF COMPUTER SCIENCE 2",
+      "cr": "(CR)",
+      "group": 2,
+      "last": "5/20/2026",
+      "ad": "65/77",
+      "duty": 12,
+      "pct": 100,
+      "section": "425KB",
+      "roll": "R425KBB06"
+    },
+    {
+      "id": 2,
+      "code": "CSK106",
+      "name": "PROFESSIONAL SKILLS FOR THE WORKPLACE",
+      "cr": "(CR)",
+      "group": 2,
+      "last": "5/20/2026",
+      "ad": "53/67",
+      "duty": 8,
+      "pct": 91,
+      "section": "425KB",
+      "roll": "R425KBB06"
+    },
+    {
+      "id": 3,
+      "code": "CSK107",
+      "name": "FRONT-END WEB DEVELOPMENT - ADVANCED",
+      "cr": "(CR)",
+      "group": 2,
+      "last": "5/20/2026",
+      "ad": "118/152",
+      "duty": 21,
+      "pct": 91,
+      "section": "425KB",
+      "roll": "R425KBB06"
+    },
+    {
+      "id": 4,
+      "code": "CSK108",
+      "name": "PROBLEM SOLVING USING PROGRAMMING - ADVANCED",
+      "cr": "(CR)",
+      "group": 2,
+      "last": "5/20/2026",
+      "ad": "79/100",
+      "duty": 14,
+      "pct": 93,
+      "section": "425KB",
+      "roll": "R425KBB06"
+    },
+    {
+      "id": 5,
+      "code": "CSK109",
+      "name": "MATHEMATICAL CONCEPTS FOR AI",
+      "cr": "(CR)",
+      "group": 2,
+      "last": "5/16/2026",
+      "ad": "32/44",
+      "duty": 7,
+      "pct": 89,
+      "section": "425KB",
+      "roll": "R425KBB06"
+    },
+    {
+      "id": 6,
+      "code": "CSK125",
+      "name": "DATABASE MANAGEMENT SYSTEMS",
+      "cr": "(CR)",
+      "group": 2,
+      "last": "5/20/2026",
+      "ad": "52/79",
+      "duty": 14,
+      "pct": 84,
+      "section": "425KB",
+      "roll": "R425KBB06"
+    }
+  ]
+}

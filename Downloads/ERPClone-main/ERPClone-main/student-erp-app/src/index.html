@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Student ERP</title>
+<style>
+  :root{
+    --orange-1:#f6685e;
+    --orange-2:#f9a23a;
+    --grad: linear-gradient(135deg, var(--orange-1) 0%, var(--orange-2) 100%);
+    --bg: #f4f4f6;
+    --card-bg:#ffffff;
+    --text-dark:#1d1d1f;
+    --text-grey:#6b6b6f;
+    --text-light-grey:#9a9a9e;
+    --green:#3fae4a;
+    --blue:#2bb6f6;
+    --header-dark:#2b2b2b;
+    --hero-bg:#eef0fb;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ margin:0; padding:0; width:100%; min-height:100%; }
+  body{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    min-height:100dvh;
+  }
+
+  /* ===== Phone frame ===== */
+  .phone{
+    width:390px;
+    width:min(390px, 100vw);
+    height:844px;
+    height:min(844px, 100vh);
+    height:min(844px, 100dvh);
+    background:var(--bg);
+    border-radius:40px;
+    overflow:hidden;
+    position:relative;
+    box-shadow: 0 0 0 10px #111, 0 30px 60px rgba(0,0,0,.5);
+  }
+
+  @media (max-width:430px){
+    .phone{
+      width:100vw;
+      height:100vh;
+      height:100dvh;
+      border-radius:0;
+      box-shadow:none;
+    }
+  }
+  .statusbar{
+    height:14px;
+    background:transparent;
+    position:relative;
+  }
+  .statusbar::after{
+    content:'';
+    position:absolute;
+    top:4px; right:24px;
+    width:8px;height:8px;
+    border-radius:50%;
+    background:#27c93f;
+  }
+
+  .screen{
+    position:absolute;
+    top:14px; left:0; right:0; bottom:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    background:var(--bg);
+    transform: translateX(0);
+    transition: transform .32s cubic-bezier(.4,0,.2,1);
+  }
+  .screen::-webkit-scrollbar{ display:none; }
+  .screen.slide-out-left{ transform: translateX(-100%); }
+  .screen.hidden{ display:none; }
+  .screen.slide-in{
+    transform: translateX(100%);
+  }
+
+  /* ===== Top Nav (Dashboard) ===== */
+  .topbar{
+    display:grid;
+    grid-template-columns: 32px 1fr 32px;
+    align-items:center;
+    padding:18px 20px 14px;
+    background:#fff;
+    position:sticky;
+    top:0;
+    z-index:5;
+    border-bottom:1px solid #ececec;
+  }
+  .topbar .title{
+    grid-column:2;
+    text-align:center;
+    font-size:22px;
+    font-weight:600;
+    color:var(--text-dark);
+    letter-spacing:.3px;
+  }
+  .menu-btn{
+    grid-column:1;
+    width:32px;
+    height:32px;
+    padding:0;
+    border:0;
+    background:none;
+    color:#222;
+    font-size:25px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .bell{
+    grid-column:3;
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    color:#6f6f73;
+  }
+  .bell svg{
+    width:23px;
+    height:23px;
+    display:block;
+    stroke:currentColor;
+  }
+
+  /* ===== Dashboard content ===== */
+  .content{ padding:16px; padding-bottom:40px; }
+
+  .profile-card{
+    background:var(--hero-bg);
+    border-radius:14px;
+    padding:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:14px;
+  }
+  .profile-info .name{ font-size:19px; font-weight:700; color:var(--text-dark); margin:0 0 6px; }
+  .profile-info .id{ font-size:14px; color:var(--text-grey); margin:0 0 6px; }
+  .profile-info .course{ font-size:14px; color:var(--text-grey); line-height:1.4; max-width:230px; margin:0; }
+  .avatar{
+    width:64px; height:64px; border-radius:50%;
+    object-fit:cover;
+    box-shadow: 0 0 0 3px #fff, 0 0 0 5px #d9defb;
+  }
+
+  .pill-row{ display:flex; gap:10px; margin-bottom:14px; }
+  .pill{
+    flex:1;
+    background:var(--grad);
+    border-radius:12px;
+    padding:14px 10px;
+    text-align:center;
+    color:#1d1d1d;
+    font-size:14.5px;
+    cursor:pointer;
+  }
+  .pill .big{ display:block; font-size:18px; font-weight:700; margin-top:4px; }
+
+  .timetable-card{
+    background:var(--grad);
+    border-radius:16px;
+    padding:6px;
+    margin-bottom:16px;
+  }
+  .tt-tabs{ display:flex; gap:0; padding:8px; }
+  .tt-tab{
+    flex:1;
+    text-align:center;
+    padding:11px 6px;
+    border-radius:10px;
+    font-size:14.5px;
+    font-weight:600;
+    cursor:pointer;
+    color:#3a2a1a;
+  }
+  .tt-tab.active{ background:#fff; color:var(--text-dark); }
+  .tt-tab.inactive{ color:#4a3520; }
+  .tt-empty{
+    text-align:center;
+    padding:34px 10px 26px;
+    font-size:17px;
+    color:#2c2410;
+    font-weight:500;
+  }
+
+  .stat-row{ display:flex; gap:10px; margin-bottom:16px; }
+  .stat-card{
+    flex:1;
+    background:#fff;
+    border-radius:14px;
+    padding:14px 8px 16px;
+    text-align:center;
+    box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  }
+  .ring{ width:84px; height:84px; margin:0 auto 8px; position:relative; }
+  .ring svg{ transform: rotate(-90deg); }
+  .ring .ring-label{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:600; color:var(--text-dark);
+  }
+  .stat-sub{ font-size:12.5px; color:var(--text-grey); margin:0; }
+  .stat-main{ font-size:13.5px; color:var(--text-dark); font-weight:600; margin:2px 0 0; }
+
+  .chart-card{
+    background:#fff;
+    border-radius:14px;
+    padding:18px 14px 14px;
+    margin-bottom:16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  }
+  .chart-area{ display:flex; height:200px; }
+  .y-axis-label{
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size:13px;
+    color:var(--text-grey);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:20px;
+    flex-shrink:0;
+  }
+  .chart-plot{
+    flex:1;
+    position:relative;
+    height:200px;
+    margin-left:8px;
+  }
+  .grid-line{
+    position:absolute; left:0; right:0; height:1px; background:#e7e7ea;
+  }
+  .bar-wrap{
+    position:absolute;
+    bottom:0;
+    left:50%;
+    transform: translateX(-50%);
+    width:120px;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+  }
+  .bar-track{
+    width:100%; height:100%;
+    background:#ececec;
+    border-radius:3px 3px 0 0;
+    position:relative;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    overflow:hidden;
+  }
+  .bar-fill{
+    width:100%;
+    background: linear-gradient(180deg, #f3b27e 0%, #ef9f63 100%);
+    display:flex; align-items:flex-start; justify-content:center;
+    padding-top:10px;
+    font-size:13.5px; font-weight:600; color:#3a2a1a;
+    box-sizing:border-box;
+  }
+  .chart-foot{ text-align:center; padding:14px 0 4px; }
+  .chart-foot .term{ font-size:13.5px; color:var(--text-grey); display:block; }
+  .chart-foot .label{ font-size:14.5px; color:var(--text-dark); font-weight:700; margin-top:2px; }
+
+  .drives-card{
+    background:var(--grad);
+    border-radius:16px;
+    padding:4px 4px 14px;
+  }
+  .drives-title{ font-size:19px; font-weight:700; color:var(--text-dark); padding:16px 18px 12px; }
+  .drive-item{
+    background:#fff;
+    border-radius:10px;
+    margin:0 10px 10px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-left:4px solid var(--orange-1);
+  }
+  .drive-item .lbl{ font-size:15px; color:var(--text-dark); }
+  .drive-item .val{
+    background:#eee;
+    border-radius:6px;
+    padding:6px 16px;
+    font-weight:700;
+    font-size:14.5px;
+    color:var(--text-dark);
+    min-width:30px;
+    text-align:center;
+  }
+
+  /* ===== Attendance screen ===== */
+  .att-header{
+    background:var(--header-dark);
+    padding:16px 16px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  .att-back{
+    position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    color:#fff; font-size:22px; cursor:pointer;
+    background:none; border:none;
+  }
+  .att-header .title{ color:#fff; font-size:19px; font-weight:500; }
+
+  .agg-bar{
+    background:#fff;
+    margin:14px 14px 12px;
+    border-radius:10px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .agg-bar .lbl{ font-size:15.5px; letter-spacing:.5px; color:var(--text-dark); font-weight:600; }
+  .agg-bar .val{
+    background:var(--grad);
+    border-radius:8px;
+    padding:8px 18px;
+    font-weight:700;
+    font-size:16px;
+    color:#1d1d1d;
+  }
+
+  .course-list{ padding:0 14px 30px; }
+  .course-card{
+    background:#fff;
+    border-radius:12px;
+    margin-bottom:14px;
+    padding:16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .course-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .course-name{ font-size:15.5px; color:var(--text-grey); line-height:1.35; max-width:230px; }
+  .course-name .cr{ color:var(--orange-1); font-weight:600; }
+  .group-tag{
+    background:var(--grad);
+    color:#3a2a1a;
+    font-size:13px;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:2px 10px 10px 10px;
+    text-align:right;
+    white-space:nowrap;
+  }
+  .course-divider{ border-top:1px solid #ececec; margin:8px 0 10px; }
+  .course-body{ display:flex; justify-content:space-between; align-items:center; }
+  .course-meta p{ margin:3px 0; font-size:14px; color:var(--text-grey); }
+  .mini-ring{ width:78px; height:78px; position:relative; flex-shrink:0; }
+  .mini-ring svg{ transform: rotate(-90deg); }
+  .mini-ring .pct,
+  .mini-ring .ring-label{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:600; color:var(--text-dark);
+  }
+  .course-foot{ display:flex; justify-content:space-between; margin-top:10px; }
+  .course-foot span{ font-size:13.5px; color:var(--orange-1); font-weight:600; }
+/* =========================
+   SPLASH SCREEN
+========================= */
+
+.splash-screen{
+  position:absolute;
+  inset:0;
+  background:#9e9e9e;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:99999;
+}
+
+.splash-logo{
+  width:110px;
+  height:110px;
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.1);}
+  100%{transform:scale(1);}
+}
+
+/* =========================
+   LPU LOGIN SCREEN
+========================= */
+
+.login-screen{
+  position:absolute;
+  top:14px;
+  left:0;
+  right:0;
+  bottom:0;
+  background:#fff;
+  overflow-y:auto;
+  overflow-x:hidden;
+  z-index:9999;
+}
+.login-bg{
+  min-height:100%;
+  background:linear-gradient(
+    180deg,
+    #f58a7a 0%,
+    #f6d27a 25%,
+    #ffffff 60%
+  );
+}
+
+.login-logo{
+  display:block;
+  width:260px;
+  margin:20px auto 120px;
+}
+
+.login-form{
+  width:88%;
+  max-width:420px;
+  margin:auto;
+}
+
+.input-box{
+  display:flex;
+  align-items:center;
+  height:62px;
+  background:#fff;
+  border:1px solid #bdbdbd;
+  border-radius:14px;
+  margin-bottom:22px;
+  overflow:hidden;
+}
+
+.input-icon{
+  width:60px;
+  text-align:center;
+  font-size:22px;
+  color:#ff8f7c;
+  border-right:1px solid #f0c4c4;
+}
+
+.login-input{
+  flex:1;
+  border:none;
+  outline:none;
+  background:none;
+  height:100%;
+  padding:0 15px;
+  font-size:18px;
+}
+
+.login-btn{
+  width:100%;
+  height: 64px;
+  border:none;
+  border-radius:8px;
+  margin-top:10px;
+  cursor:pointer;
+
+  background:
+  linear-gradient(
+    90deg,
+    #f68173,
+    #f6d06e
+  );
+
+  font-size:22px;
+  color:#333;
+  font-weight:500;
+
+  box-shadow:
+  0 8px 12px rgba(0,0,0,.25);
+}
+
+.login-links{
+  display:flex;
+  justify-content:space-between;
+  margin-top:16px;
+}
+
+.mini-btn{
+  width:46%;
+  height:42px;
+  background:#fff;
+  border:1px solid #d7d7d7;
+  border-radius:4px;
+  font-size:14px;
+}
+
+.naac-section{
+  margin-top:90px;
+  text-align:center;
+}
+
+.naac-img{
+  width:95%;
+  max-width:450px;
+}
+
+/* ===== Added application pages ===== */
+.page-header{
+  min-height:72px;
+  padding:14px 18px;
+  display:grid;
+  grid-template-columns:90px 1fr 90px;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:8;
+  background:#2e2e2e;
+  color:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+.page-header h2{
+  margin:0;
+  grid-column:2;
+  text-align:center;
+  font-size:21px;
+  font-weight:400;
+  letter-spacing:.2px;
+}
+.page-back{
+  border:0;
+  background:none;
+  color:#fff;
+  font-size:36px;
+  line-height:1;
+  cursor:pointer;
+  text-align:left;
+  padding:0;
+}
+.page-back.with-text{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  font-size:22px;
+  color:#e5e5e5;
+}
+.page-back.with-text .back-arrow{
+  font-size:38px;
+  line-height:1;
+}
+.results-summary{
+  min-height:286px;
+  padding:42px 20px 36px;
+  text-align:center;
+  background:linear-gradient(100deg,#ff7b70 0%,#ffb06c 55%,#ffdc73 100%);
+  border-radius:0 0 28px 28px;
+  box-shadow:0 2px 7px rgba(0,0,0,.18);
+}
+.large-ring{
+  width:140px;
+  height:140px;
+  margin:0 auto 72px;
+  position:relative;
+}
+.large-ring svg{ transform:rotate(-90deg); }
+.large-ring .ring-label{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:25px;
+  color:var(--text-dark);
+  font-weight:300;
+}
+.summary-title{
+  margin:0;
+  font-size:24px;
+  font-weight:300;
+  color:#282828;
+}
+.result-overall-row{
+  display:none;
+}
+.semester-list{
+  padding:52px 30px 40px;
+}
+#semesterList{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:22px 18px;
+  align-items:start;
+}
+.attendance-subjects{
+  padding:22px 16px 36px;
+}
+.subject-results{
+  padding:12px 10px 36px;
+}
+.section-heading{
+  display:none;
+  margin:0 0 14px;
+  font-size:19px;
+  color:var(--text-dark);
+}
+.semester-card{
+  width:100%;
+  min-height:176px;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  border:1px solid #e0e0e0;
+  border-radius:4px;
+  background:#fff;
+  box-shadow:0 2px 7px rgba(0,0,0,.22);
+  text-align:center;
+  cursor:pointer;
+}
+.semester-card-head{
+  height:36px;
+  padding:7px 8px;
+  display:block;
+  background:#303030;
+  color:#fff;
+  font-size:18px;
+  font-weight:700;
+  border-radius:4px 4px 0 0;
+}
+.semester-stats{
+  min-height:138px;
+  padding:22px 8px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.semester-stat{ display:none; }
+.semester-ring{
+  width:94px;
+  height:94px;
+  position:relative;
+}
+.semester-ring svg{ transform:rotate(-90deg); }
+.semester-ring .ring-label{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:17px;
+  font-weight:300;
+  color:#454545;
+}
+.semester-overview{
+  display:none;
+}
+.grades-card{
+  background:#fff;
+  border-radius:6px;
+  box-shadow:0 9px 22px rgba(0,0,0,.14);
+  overflow:hidden;
+  border:1px solid #efefef;
+}
+.grades-card-top{
+  padding:8px 12px 0;
+  text-align:right;
+  color:#555;
+  font-size:15px;
+}
+.grades-table-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  padding:4px 12px 5px;
+  border-bottom:1px solid #ececec;
+  color:#444;
+  font-size:17px;
+}
+.grades-table-head .semester-name{
+  display:block;
+  color:#d6943b;
+  margin-bottom:7px;
+}
+.grades-table-head .tgpa{
+  display:block;
+  color:#d6943b;
+  margin-bottom:7px;
+  text-align:right;
+}
+.grades-row{
+  display:grid;
+  grid-template-columns:1fr 82px;
+  gap:10px;
+  min-height:58px;
+  padding:10px 12px 7px;
+  border-bottom:1px solid #eeeeee;
+}
+.grades-row:last-child{ border-bottom:0; }
+.grade-course{
+  color:#666;
+  font-size:14px;
+  line-height:1.35;
+  align-self:center;
+  text-transform:uppercase;
+}
+.grade-cell{
+  text-align:center;
+  color:#2fa36d;
+}
+.grade-badge{
+  display:inline-block;
+  min-width:44px;
+  padding:3px 11px;
+  border-radius:4px;
+  background:#ddf5e6;
+  border:1px solid #c9ead5;
+  color:#209e68;
+  font-size:19px;
+  font-weight:500;
+  text-align:center;
+}
+.grade-desc{
+  display:block;
+  margin-top:3px;
+  color:#2fa36d;
+  font-size:14px;
+}
+/* ===== Drawer ===== */
+.drawer-backdrop{
+  position:absolute;
+  inset:0;
+  z-index:50;
+  background:rgba(0,0,0,.56);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .25s ease, visibility .25s ease;
+}
+.drawer-backdrop.open{ opacity:1; visibility:visible; }
+.drawer{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  z-index:51;
+  width:72%;
+  max-width:420px;
+  display:flex;
+  flex-direction:column;
+  background:#fff;
+  transform:translateX(-105%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  box-shadow:7px 0 20px rgba(0,0,0,.2);
+}
+.drawer.open{ transform:translateX(0); }
+.drawer-profile{
+  flex-shrink:0;
+  padding:26px 14px 24px;
+  background:linear-gradient(110deg,#ff7c70 0%,#ffad6c 55%,#ffd36c 100%);
+  text-align:center;
+}
+.drawer-avatar{
+  width:98px;
+  height:98px;
+  border:2px solid rgba(255,255,255,.82);
+  border-radius:50%;
+  object-fit:cover;
+  box-shadow:0 6px 14px rgba(0,0,0,.32);
+}
+.drawer-profile h3{ margin:13px 0 5px; font-size:18px; font-weight:600; color:#151515; }
+.drawer-profile p{ margin:3px 0; font-size:13px; line-height:1.4; color:#1f1f1f; }
+.drawer-search{
+  flex-shrink:0;
+  margin:14px 12px 10px;
+  height:48px;
+  padding:0 12px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  border-radius:12px;
+  background:#eeeeef;
+  color:#666;
+}
+.drawer-search span{
+  width:17px;
+  height:17px;
+  position:relative;
+  flex:0 0 17px;
+  border:2px solid #666;
+  border-radius:50%;
+}
+.drawer-search span::after{
+  content:'';
+  width:7px;
+  height:2px;
+  position:absolute;
+  right:-6px;
+  bottom:-3px;
+  border-radius:2px;
+  background:#666;
+  transform:rotate(45deg);
+}
+.drawer-search input{
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#444;
+  font:inherit;
+  font-size:17px;
+}
+.drawer-search input::placeholder{ color:#777; }
+.drawer-nav{ padding:0; flex:1; overflow-y:auto; }
+.drawer-item{
+  width:100%;
+  min-height:58px;
+  padding:11px 16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  border:0;
+  border-bottom:1px solid #ededed;
+  background:#fff;
+  color:#565656;
+  font-size:16px;
+  text-align:left;
+  cursor:pointer;
+}
+.drawer-item:active{ background:#f5f5f5; }
+.drawer-item .icon{ width:30px; text-align:center; font-size:20px; color:#555; filter:grayscale(1); }
+.drawer-empty{
+  display:none;
+  padding:20px;
+  text-align:center;
+  color:#777;
+  font-size:14px;
+}
+.drawer-logout{
+  flex-shrink:0;
+  min-height:50px;
+  margin:10px 10px 14px;
+  padding:12px;
+  border:0;
+  border-radius:25px;
+  background:linear-gradient(90deg,#ff786e 0%,#ffa76c 53%,#ffd36a 100%);
+  color:#171717;
+  font-size:16px;
+  box-shadow:0 2px 5px rgba(0,0,0,.08);
+  cursor:pointer;
+}
+</style>
+  <script src="config.js"></script>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"></div>
+
+<!-- SPLASH SCREEN -->
+<div id="splashScreen" class="splash-screen">
+  <img src="images/logo.png" class="splash-logo" alt="Logo">
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen" style="display:none;">
+
+  <div class="login-bg">
+
+    <img src="images/logo.png" class="login-logo" alt="LPU Logo">
+
+    <div class="login-form">
+
+      <div class="input-box">
+        <span class="input-icon">👤</span>
+        <input
+          type="text"
+          id="studentId"
+          placeholder="Student ID"
+          class="login-input">
+      </div>
+
+      <div class="input-box">
+        <span class="input-icon">🔒</span>
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          class="login-input">
+      </div>
+
+      <button id="loginBtn" class="login-btn">
+        Sign In →
+      </button>
+
+      <div class="login-links">
+        <button class="mini-btn">Register New Number</button>
+        <button class="mini-btn">Login With OTP</button>
+      </div>
+
+      <div class="login-links">
+        <button class="mini-btn">Forgot Password ?</button>
+        <button class="mini-btn">Guest User</button>
+      </div>
+
+<div class="naac-section">
+  <img
+    src="images/naac.png"
+    class="naac-img"
+    alt="NAAC">
+</div>
+
+</div>
+</div>
+</div>
+
+  <!-- ============ DASHBOARD SCREEN ============ -->
+  <div class="screen" id="dashboardScreen" style="display:none;">
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu">&#9776;</button>
+      <div class="title">Dashboard</div>
+      <div class="bell" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 8.5a6 6 0 0 0-12 0c0 7-3 7-3 8.8h18c0-1.8-3-1.8-3-8.8Z"></path>
+          <path d="M9.8 20a2.4 2.4 0 0 0 4.4 0"></path>
+        </svg>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="profile-card">
+        <div class="profile-info">
+          <p class="name" id="profileName">Loading...</p>
+          <p class="id" id="profileId"></p>
+          <p class="course" id="profileCourse"></p>
+        </div>
+        <img class="avatar" id="profileAvatar" src="" alt="profile" />
+      </div>
+
+      <div class="pill-row">
+        <div class="pill">Fee Balance<span class="big" id="feeBalance">Nil</span></div>
+        <div class="pill" style="display:flex;align-items:center;justify-content:center;"><span id="calendarLabel">Academic Calendar</span></div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card" id="cgpaTile" style="cursor:pointer;">
+          <div class="ring" data-pct="81.5" data-color="green"></div>
+          <p class="stat-sub">(Out of 10)</p>
+          <p class="stat-main">CGPA</p>
+        </div>
+        <div class="stat-card" id="percentageTile" style="cursor:pointer;">
+          <div class="ring" data-pct="81.5" data-color="green"></div>
+          <p class="stat-sub">(Overall)</p>
+          <p class="stat-main">Percentage</p>
+        </div>
+        <div class="stat-card" id="attendanceTile" style="cursor:pointer;">
+          <div class="ring" data-pct="92" data-color="green"></div>
+          <p class="stat-sub">(Satisfactory)</p>
+          <p class="stat-main">Attendance</p>
+        </div>
+      </div>
+
+      <div class="chart-card" id="resultChart" style="cursor:pointer;">
+        <div class="chart-area">
+          <div class="y-axis-label">Percentage</div>
+          <div class="chart-plot" id="chartPlot">
+            <div class="bar-wrap">
+              <div class="bar-track">
+                <div class="bar-fill" id="resultBar">81.5%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-foot">
+          <span class="term">Term I</span>
+          <span class="label">Result Terms</span>
+        </div>
+      </div>
+
+      <div class="drives-card">
+        <div class="drives-title">Placement Drives:</div>
+        <div class="drive-item"><span class="lbl">Upcoming Drives</span><span class="val">0</span></div>
+        <div class="drive-item"><span class="lbl">Recent Drives</span><span class="val">0</span></div>
+        <div class="drive-item"><span class="lbl">Selected</span><span class="val">0</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ ATTENDANCE SCREEN ============ -->
+  <div class="screen hidden" id="attendanceScreen">
+    <div class="att-header">
+      <button class="att-back" id="backBtn">&#8592;</button>
+      <div class="title">Attendance</div>
+    </div>
+
+    <div class="agg-bar">
+      <span class="lbl">AGGREGATE&nbsp;&nbsp;ATTENDANCE</span>
+      <span class="val">92%</span>
+    </div>
+
+    <div class="course-list" id="courseList"></div>
+  </div>
+
+  <!-- ============ RESULTS SCREEN ============ -->
+  <div class="screen hidden" id="resultsScreen">
+    <div class="page-header">
+      <button class="page-back" id="resultsBackBtn" type="button" aria-label="Back">&#8592;</button>
+      <h2>Result</h2>
+    </div>
+
+    <div class="results-summary">
+      <div class="large-ring" id="overallCgpaRing" data-pct="81.5"></div>
+      <p class="summary-title">Overall Performance</p>
+      <div class="result-overall-row">
+        <div><strong id="overallCgpaValue">8.15</strong><span>Overall CGPA</span></div>
+        <div><strong id="overallPercentageValue">81.5%</strong><span>Overall Percentage</span></div>
+      </div>
+    </div>
+
+    <div class="semester-list">
+      <h3 class="section-heading">Semester Results</h3>
+      <div id="semesterList"></div>
+    </div>
+  </div>
+
+  <!-- ============ SEMESTER DETAILS SCREEN ============ -->
+  <div class="screen hidden" id="semesterDetailsScreen">
+    <div class="page-header">
+      <button class="page-back with-text" id="semesterBackBtn" type="button" aria-label="Back"><span class="back-arrow">&#8249;</span><span>Back</span></button>
+      <h2 id="semesterPageTitle">Result</h2>
+    </div>
+
+    <div class="semester-overview">
+      <p>Semester CGPA</p>
+      <strong>8.15</strong>
+    </div>
+
+    <div class="subject-results">
+      <h3 class="section-heading">Subjects</h3>
+      <div class="grades-card">
+        <div class="grades-card-top">Grades info. <span aria-hidden="true">ℹ️</span></div>
+        <div class="grades-table-head">
+          <div>
+            <span class="semester-name" id="gradeSemesterName">Semester:I</span>
+            <span>Course</span>
+          </div>
+          <div>
+            <span class="tgpa">TGPA : <span id="semesterCgpaValue">8.15</span></span>
+            <span>Grade</span>
+          </div>
+        </div>
+        <div id="subjectResultsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DRAWER ============ -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-profile">
+      <img class="drawer-avatar" id="drawerAvatar" src="images/profile.jpg.png" alt="Student profile">
+      <h3 id="drawerName">Student</h3>
+      <p id="drawerStudentId"></p>
+      <p id="drawerCourse"></p>
+    </div>
+    <label class="drawer-search">
+      <span aria-hidden="true"></span>
+      <input id="drawerSearch" type="search" placeholder="Search" autocomplete="off" aria-label="Search menu">
+    </label>
+    <nav class="drawer-nav" aria-label="Main navigation">
+      <button class="drawer-item" type="button" data-drawer-action="dashboard"><span class="icon">&#8962;</span>Dashboard</button>
+      <button class="drawer-item" type="button" data-drawer-action="attendance"><span class="icon">&#10003;</span>Attendance</button>
+      <button class="drawer-item" type="button" data-drawer-action="results"><span class="icon">&#128196;</span>Results</button>
+      <button class="drawer-item" type="button" data-drawer-action="calendar"><span class="icon">&#128197;</span>Academic Calendar</button>
+      <button class="drawer-item" type="button" data-drawer-action="placements"><span class="icon">&#128188;</span>Placement Drives</button>
+      <p class="drawer-empty" id="drawerEmpty">No menu items found</p>
+    </nav>
+    <button class="drawer-logout" id="logoutBtn" type="button">Logout &#10140;</button>
+  </aside>
+
+</div>
+
+  <script>
+  // Fetch data from backend API (configured in config.js) and populate UI
+  const chartPlot = document.getElementById('chartPlot');
+  const resultBar = document.getElementById('resultBar');
+
+  function buildRing(el, progressValue, displayValue){
+    if(!el) return;
+    const rawProgress = progressValue ?? parseFloat(el.dataset.pct) ?? 0;
+    const pct = Math.max(0, Math.min(100, Number(rawProgress) || 0));
+    const size = el.classList.contains('large-ring') ? 140 : (el.classList.contains('semester-ring') ? 94 : (el.classList.contains('mini-ring') ? 78 : 84));
+    const stroke = 7;
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const offset = c - (pct/100) * c;
+    const label = displayValue ?? `${pct % 1 === 0 ? pct : pct.toFixed(1)}%`;
+    el.innerHTML = `
+      <svg width="${size}" height="${size}">
+        <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#e9e9ec" stroke-width="${stroke}" fill="none"/>
+        <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#3fae4a" stroke-width="${stroke}" fill="none"
+          stroke-linecap="round"
+          stroke-dasharray="${c}" stroke-dashoffset="${c}">
+          <animate attributeName="stroke-dashoffset" from="${c}" to="${offset}" dur=".9s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1"/>
+        </circle>
+      </svg>
+      <div class="ring-label">${label}</div>
+    `;
+  }
+
+  const DEFAULT_PROFILE = {
+    name: 'Loading...',
+    id: '',
+    course: '',
+    avatar: 'images/profile.jpg.png'
+  };
+  const DEFAULT_STATS = { cgpa:8.15, percentage:81.5, attendance:92, feeBalance:'Nil' };
+  const DEFAULT_DRIVES = { upcoming:0, recent:0, selected:0 };
+  const DEFAULT_COURSES = [
+    { code:'CSE312', name:'Computer Networks', pct:92 },
+    { code:'CSE314', name:'Operating Systems', pct:88 },
+    { code:'CSE316', name:'Cyber Security Fundamentals', pct:95 },
+    { code:'CSE318', name:'Digital Forensics', pct:90 }
+  ];
+  const DEFAULT_RESULTS = {
+    overall:{ cgpa:8.15, percentage:81.5 },
+    semesters:[
+      {
+        name:'Semester 1', cgpa:8.15, percentage:81.5,
+        subjects:[
+          { name:'Cyber Security Fundamentals', code:'CSE316', credits:4, marks:91, grade:'A+' },
+          { name:'Computer Networks', code:'CSE312', credits:4, marks:86, grade:'A' },
+          { name:'Operating Systems', code:'CSE314', credits:4, marks:78, grade:'B+' },
+          { name:'Digital Forensics', code:'CSE318', credits:3, marks:88, grade:'A' }
+        ]
+      },
+      {
+        name:'Semester 2', cgpa:8.32, percentage:83.2,
+        subjects:[
+          { name:'Network Security', code:'CSE321', credits:4, marks:89, grade:'A' },
+          { name:'Ethical Hacking', code:'CSE323', credits:4, marks:93, grade:'A+' },
+          { name:'Cloud Computing', code:'CSE325', credits:3, marks:82, grade:'A' },
+          { name:'Cryptography', code:'CSE327', credits:4, marks:79, grade:'B+' }
+        ]
+      }
+    ]
+  };
+
+  const appData = {
+    profile:{...DEFAULT_PROFILE},
+    stats:{...DEFAULT_STATS},
+    drives:{...DEFAULT_DRIVES},
+    courses:[...DEFAULT_COURSES],
+    results:JSON.parse(JSON.stringify(DEFAULT_RESULTS))
+  };
+  let dataLoaded = false;
+
+  function escapeHtml(value){
+    return String(value ?? '').replace(/[&<>'"]/g, char => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
+    })[char]);
+  }
+
+  function hasData(value){
+    return value && (Array.isArray(value) ? value.length > 0 : Object.keys(value).length > 0);
+  }
+
+  async function fetchJson(endpoint, fallback){
+    try{
+      const savedStudentId = localStorage.getItem('studentId');
+      const separator = endpoint.includes('?') ? '&' : '?';
+      const studentQuery = savedStudentId ? `${separator}id=${encodeURIComponent(savedStudentId)}` : '';
+      const response = await fetch(CONFIG.API_BASE_URL + endpoint + studentQuery);
+      if(!response.ok) return fallback;
+      const value = await response.json();
+      return hasData(value) ? value : fallback;
+    }catch(error){
+      console.warn(`Using local fallback for ${endpoint}`, error);
+      return fallback;
+    }
+  }
+
+  function formatScore(value, digits=2){
+    const number = Number(value) || 0;
+    return number.toFixed(digits).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+  }
+
+  function toRoman(number){
+    const values = [
+      [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']
+    ];
+    let n = Number(number) || 0;
+    let output = '';
+    values.forEach(([value, symbol]) => {
+      while(n >= value){
+        output += symbol;
+        n -= value;
+      }
+    });
+    return output || String(number || '');
+  }
+
+  function getSemesterNumber(name, fallbackIndex){
+    const match = String(name || '').match(/\d+/);
+    return match ? Number(match[0]) : fallbackIndex + 1;
+  }
+
+  function getSemesterLabel(semester, index, withSpace=true){
+    const roman = toRoman(getSemesterNumber(semester?.name, index));
+    return withSpace ? `Semester : ${roman}` : `Semester:${roman}`;
+  }
+
+  function gradeDescription(grade){
+    const descriptions = {
+      'O': 'Outstanding',
+      'A+': 'Excellent',
+      'A': 'Very Good',
+      'B+': 'Good',
+      'B': 'Above Average',
+      'C': 'Average',
+      'D': 'Pass'
+    };
+    return descriptions[String(grade || '').toUpperCase()] || '';
+  }
+
+  function applyProfile(profile){
+    document.getElementById('profileName').textContent = profile.name || '';
+    document.getElementById('profileId').textContent = profile.id || '';
+    document.getElementById('profileCourse').textContent = profile.course || '';
+    const avatar = profile.avatar || 'images/profile.jpg.png';
+    document.getElementById('profileAvatar').src = avatar;
+    document.getElementById('drawerAvatar').src = avatar;
+    document.getElementById('drawerName').textContent = profile.name || 'Student';
+    document.getElementById('drawerStudentId').textContent = profile.id || '';
+    document.getElementById('drawerCourse').textContent = profile.course || '';
+  }
+
+  function applyStats(stats){
+    const cgpa = Number(stats.cgpa) || 0;
+    const percentage = Number(stats.percentage) || 0;
+    const attendance = Number(stats.attendance) || 0;
+    const dashboardRings = document.querySelectorAll('#dashboardScreen .ring');
+
+    // CGPA is out of 10: 8.15 must draw 81.5% of the circle while displaying 8.15.
+    buildRing(dashboardRings[0], cgpa * 10, formatScore(cgpa));
+    buildRing(dashboardRings[1], percentage, `${formatScore(percentage, 1)}%`);
+    buildRing(dashboardRings[2], attendance, `${formatScore(attendance, 1)}%`);
+    resultBar.style.height = `${Math.max(0, Math.min(100, percentage))}%`;
+    resultBar.textContent = `${formatScore(percentage, 1)}%`;
+    document.getElementById('feeBalance').textContent = stats.feeBalance ?? 'Nil';
+  }
+
+  function applyDrives(drives){
+    const values = document.querySelectorAll('.drives-card .val');
+    if(values.length >= 3){
+      values[0].textContent = drives.upcoming ?? 0;
+      values[1].textContent = drives.recent ?? 0;
+      values[2].textContent = drives.selected ?? 0;
+    }
+  }
+
+  function renderAttendance(){
+    const attendance = Number(appData.stats.attendance) || 0;
+    document.querySelector('.agg-bar .val').textContent = `${formatScore(attendance, 1)}%`;
+    document.getElementById('courseList').innerHTML = appData.courses.map((course, index) => `
+        <div class="course-card">
+          <div class="course-top">
+            <div class="course-name">${escapeHtml(course.code)} - ${escapeHtml(course.name)} <span class="cr">${escapeHtml(course.cr || '')}</span></div>
+            <div class="group-tag">Group:<br>${escapeHtml(course.group || '')}</div>
+          </div>
+          <div class="course-divider"></div>
+          <div class="course-body">
+            <div class="course-meta">
+              <p>Faculty:</p>
+              <p>Faculty Seating: NA</p>
+              <p>Last Attended: ${escapeHtml(course.last || '')}</p>
+              <p>Attended/Delivered: ${escapeHtml(course.ad || '')}</p>
+              <p>Duty Leaves: ${escapeHtml(course.duty || '')}</p>
+            </div>
+            <div class="mini-ring" data-pct="${Number(course.pct) || 0}" id="mini-${index}"></div>
+          </div>
+          <div class="course-foot">
+            <span>Section:${escapeHtml(course.section || '')}</span>
+            <span>Roll No: ${escapeHtml(course.roll || '')}</span>
+          </div>
+        </div>`).join('');
+    appData.courses.forEach((course, index) => {
+      const ring = document.getElementById(`mini-${index}`);
+      buildRing(ring, Number(course.pct) || 0, `${formatScore(course.pct, 1)}%`);
+    });
+  }
+
+  function renderResults(){
+    const overall = appData.results.overall || appData.stats;
+    const cgpa = Number(overall.cgpa) || Number(appData.stats.cgpa) || 0;
+    const percentage = Number(overall.percentage) || Number(appData.stats.percentage) || 0;
+    buildRing(document.getElementById('overallCgpaRing'), cgpa * 10, formatScore(cgpa));
+    document.getElementById('overallCgpaValue').textContent = formatScore(cgpa);
+    document.getElementById('overallPercentageValue').textContent = `${formatScore(percentage, 1)}%`;
+    document.getElementById('semesterList').innerHTML = (appData.results.semesters || []).map((semester, index) => `
+      <button class="semester-card" type="button" data-semester-index="${index}">
+        <span class="semester-card-head">${escapeHtml(getSemesterLabel(semester, index))}</span>
+        <span class="semester-stats">
+          <span class="semester-ring" id="semesterRing-${index}"></span>
+        </span>
+      </button>`).join('');
+    (appData.results.semesters || []).forEach((semester, index) => {
+      buildRing(document.getElementById(`semesterRing-${index}`), Number(semester.cgpa) * 10, formatScore(semester.cgpa));
+    });
+  }
+
+  function renderSemesterDetails(index){
+    const semester = appData.results.semesters?.[index];
+    if(!semester) return;
+    document.getElementById('semesterPageTitle').textContent = 'Result';
+    document.getElementById('gradeSemesterName').textContent = getSemesterLabel(semester, index, false);
+    document.getElementById('semesterCgpaValue').textContent = formatScore(semester.cgpa);
+    document.getElementById('subjectResultsList').innerHTML = (semester.subjects || []).map(subject => `
+      <div class="grades-row">
+        <div class="grade-course">${escapeHtml(subject.code)} :: ${escapeHtml(subject.name)}</div>
+        <div class="grade-cell">
+          <span class="grade-badge">${escapeHtml(subject.grade)}</span>
+          <span class="grade-desc">${escapeHtml(gradeDescription(subject.grade))}</span>
+        </div>
+      </div>`).join('');
+    showScreen('semesterDetailsScreen');
+  }
+
+  function applyAllData(){
+    applyProfile(appData.profile);
+    applyStats(appData.stats);
+    applyDrives(appData.drives);
+    renderAttendance();
+    renderResults();
+  }
+
+  async function loadData(){
+    if(dataLoaded) return;
+    dataLoaded = true;
+    applyAllData();
+    const [profile, stats, drives, courses, results] = await Promise.all([
+      fetchJson('/api/profile', appData.profile),
+      fetchJson('/api/stats', appData.stats),
+      fetchJson('/api/drives', appData.drives),
+      fetchJson('/api/courses', appData.courses),
+      fetchJson('/api/results', appData.results)
+    ]);
+    appData.profile = {...appData.profile, ...profile};
+    appData.stats = {...appData.stats, ...stats};
+    appData.drives = {...appData.drives, ...drives};
+    appData.courses = hasData(courses) ? courses : appData.courses;
+    appData.results = hasData(results) ? results : appData.results;
+    applyAllData();
+  }
+
+  const dashboardScreen = document.getElementById('dashboardScreen');
+  const attendanceScreen = document.getElementById('attendanceScreen');
+  const applicationScreens = [
+    dashboardScreen,
+    attendanceScreen,
+    document.getElementById('resultsScreen'),
+    document.getElementById('semesterDetailsScreen')
+  ];
+
+  function showScreen(screenId){
+    applicationScreens.forEach(screen => {
+      const active = screen.id === screenId;
+      screen.classList.toggle('hidden', !active);
+      screen.style.display = active ? 'block' : 'none';
+      screen.style.transform = 'translateX(0)';
+      if(active) screen.scrollTop = 0;
+    });
+    closeDrawer();
+  }
+
+  function openResults(){
+    renderResults();
+    showScreen('resultsScreen');
+  }
+
+  function openAttendance(){
+    renderAttendance();
+    showScreen('attendanceScreen');
+  }
+
+  const drawer = document.getElementById('drawer');
+  const drawerBackdrop = document.getElementById('drawerBackdrop');
+
+  function openDrawer(){
+    drawer.classList.add('open');
+    drawerBackdrop.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeDrawer(){
+    drawer.classList.remove('open');
+    drawerBackdrop.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+
+  document.getElementById('attendanceTile').addEventListener('click', openAttendance);
+  document.getElementById('cgpaTile').addEventListener('click', openResults);
+  document.getElementById('percentageTile').addEventListener('click', openResults);
+  document.getElementById('resultChart').addEventListener('click', openResults);
+  document.getElementById('backBtn').addEventListener('click', showDashboard);
+  document.getElementById('resultsBackBtn').addEventListener('click', showDashboard);
+  document.getElementById('semesterBackBtn').addEventListener('click', openResults);
+  document.getElementById('menuBtn').addEventListener('click', openDrawer);
+  drawerBackdrop.addEventListener('click', closeDrawer);
+  document.getElementById('drawerSearch').addEventListener('input', event => {
+    const query = event.target.value.trim().toLowerCase();
+    let visibleItems = 0;
+    document.querySelectorAll('.drawer-item').forEach(item => {
+      const visible = item.textContent.toLowerCase().includes(query);
+      item.style.display = visible ? 'flex' : 'none';
+      if(visible) visibleItems++;
+    });
+    document.getElementById('drawerEmpty').style.display = visibleItems ? 'none' : 'block';
+  });
+  document.getElementById('semesterList').addEventListener('click', event => {
+    const card = event.target.closest('[data-semester-index]');
+    if(card) renderSemesterDetails(Number(card.dataset.semesterIndex));
+  });
+  document.querySelectorAll('[data-drawer-action]').forEach(item => item.addEventListener('click', () => {
+    const action = item.dataset.drawerAction;
+    if(action === 'attendance') return openAttendance();
+    if(action === 'results') return openResults();
+    showDashboard();
+    if(action === 'calendar'){
+      requestAnimationFrame(() => document.getElementById('calendarLabel').closest('.pill').scrollIntoView({behavior:'smooth', block:'center'}));
+    }
+    if(action === 'placements'){
+      requestAnimationFrame(() => document.querySelector('.drives-card').scrollIntoView({behavior:'smooth', block:'center'}));
+    }
+  }));
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('studentId');
+    closeDrawer();
+    applicationScreens.forEach(screen => {
+      screen.classList.add('hidden');
+      screen.style.display = 'none';
+    });
+    document.getElementById('loginScreen').style.display = 'block';
+    document.getElementById('studentId').value = '';
+    document.getElementById('password').value = '';
+  });
+
+  function buildChartGridlines(){
+    chartPlot.querySelectorAll('.grid-line').forEach(line => line.remove());
+    const plotHeight = chartPlot.clientHeight;
+    const gridCount = 5;
+    for (let i = 0; i <= gridCount; i++) {
+      const line = document.createElement('div');
+      line.className = 'grid-line';
+      line.style.top = (plotHeight / gridCount) * i + 'px';
+      chartPlot.insertBefore(line, chartPlot.firstChild);
+    }
+  }
+/* =========================
+   LOGIN SYSTEM
+========================= */
+
+function showDashboard(){
+  document.getElementById("loginScreen").style.display="none";
+  showScreen('dashboardScreen');
+  requestAnimationFrame(buildChartGridlines);
+  loadData();
+}
+
+window.addEventListener("load",()=>{
+
+  setTimeout(()=>{
+
+    document.getElementById("splashScreen").style.display="none";
+
+    const loggedIn =
+      localStorage.getItem("loggedIn");
+
+    if(loggedIn==="true"){
+      if(!localStorage.getItem("studentId")){
+        localStorage.setItem("studentId", "12518549");
+      }
+      showDashboard();
+    }else{
+      document.getElementById("loginScreen").style.display="block";
+      applicationScreens.forEach(screen => {
+        screen.classList.add('hidden');
+        screen.style.display="none";
+      });
+    }
+
+  },3000);
+
+});
+
+document
+.getElementById("loginBtn")
+.addEventListener("click",()=>{
+
+  const id =
+    document.getElementById("studentId").value;
+
+  const pass =
+    document.getElementById("password").value;
+
+  if(
+    id==="12518549" &&
+    pass==="123456"
+  ){
+
+    localStorage.setItem(
+      "loggedIn",
+      "true"
+    );
+
+    localStorage.setItem(
+      "studentId",
+      id
+    );
+
+    showDashboard();
+
+  }else{
+
+    alert(
+      "Invalid Student ID or Password"
+    );
+
+  }
+
+});
+  //loadData();
+
+</script>
+
+</body>
+</html>

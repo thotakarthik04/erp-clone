@@ -1,0 +1,6 @@
+node_modules/
+.env
+.vscode/
+server/test.js
+server/migrate.js
+server/db.json
