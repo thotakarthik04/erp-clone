@@ -250,7 +250,19 @@ async function getStudent(studentId) {
 // -----------------------------------
 
 function firstValue(...values) {
-  return values.find(value => value !== undefined && value !== null && value !== "");
+  for (const value of values) {
+    if (value === undefined || value === null) continue;
+
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed !== "") return trimmed;
+      continue;
+    }
+
+    return value;
+  }
+
+  return undefined;
 }
 
 function asArray(value) {
