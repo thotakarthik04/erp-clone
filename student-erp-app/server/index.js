@@ -14,11 +14,15 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, "db.json");
-const STUDENTS_TABLE = process.env.STUDENTS_TABLE || "Students";
+const STUDENTS_TABLE =
+  process.env.STUDENTS_TABLE ||
+  process.env.DYNAMODB_TABLE ||
+  "Students";
 const STUDENT_KEY_NAME =
   process.env.STUDENTS_PARTITION_KEY ||
   process.env.STUDENT_PARTITION_KEY ||
   "studentId";
+const LOCAL_FALLBACK_ENABLED = process.env.ALLOW_LOCAL_FALLBACK === "true";
 
 app.use(express.json());
 
@@ -114,11 +118,58 @@ async function scanFirstStudent(source) {
   return null;
 }
 
+function getErrorText(err) {
+  if (!err) return null;
+  return err.name || err.code || err.message || String(err);
+}
+
+function dynamoFailure(source, err) {
+  return {
+    __dynamoFailed: true,
+    __source: source,
+    __error: getErrorText(err),
+    profile: {
+      name: "DynamoDB not connected",
+      id: "",
+      course: "Check AWS region, credentials, table name, and IAM permission",
+      avatar: "images/profile.jpg.png"
+    },
+    stats: {
+      attendance: 0,
+      cgpa: 0,
+      percentage: 0,
+      feeBalance: "DynamoDB error"
+    },
+    drives: {},
+    courses: [],
+    results: {
+      overall: {
+        cgpa: 0,
+        percentage: 0
+      },
+      semesters: []
+    }
+  };
+}
+
+function localFallback(source, err) {
+  if (!LOCAL_FALLBACK_ENABLED) {
+    return dynamoFailure(source, err);
+  }
+
+  const fallback = readDB();
+  fallback.__source = source;
+  fallback.__error = getErrorText(err);
+  fallback.__localFallbackEnabled = true;
+  return fallback;
+}
+
 async function getStudent(studentId) {
   if (!process.env.AWS_REGION && !process.env.AWS_DEFAULT_REGION) {
-    const fallback = readDB();
-    fallback.__source = "local-db-no-region";
-    return fallback;
+    return localFallback(
+      "dynamodb-missing-region",
+      new Error("AWS_REGION or AWS_DEFAULT_REGION is missing")
+    );
   }
 
   try {
@@ -172,29 +223,25 @@ async function getStudent(studentId) {
         return firstStudent;
       }
 
-      const fallback = readDB();
-      fallback.__source = "local-db-item-not-found";
-      if (getError) {
-        fallback.__error = getError?.name || getError?.code || getError?.message || "DynamoDB get error";
-      }
-      return fallback;
+      return localFallback(
+        "dynamodb-item-not-found",
+        getError || new Error(`No DynamoDB item found for studentId=${studentId}`)
+      );
     }
 
     const firstStudent = await scanFirstStudent("dynamodb-scan");
 
     if (!firstStudent) {
-      const fallback = readDB();
-      fallback.__source = "local-db-empty-table";
-      return fallback;
+      return localFallback(
+        "dynamodb-empty-table",
+        new Error(`No items found in DynamoDB table ${STUDENTS_TABLE}`)
+      );
     }
 
     return firstStudent;
   } catch (err) {
     console.error("DynamoDB Error:", err);
-    const fallback = readDB();
-    fallback.__source = "local-db-dynamodb-error";
-    fallback.__error = err?.name || err?.code || err?.message || "DynamoDB error";
-    return fallback;
+    return localFallback("dynamodb-error", err);
   }
 }
 
@@ -433,6 +480,11 @@ app.get("/api/debug/student", async (req, res) => {
     table: STUDENTS_TABLE,
     partitionKey: STUDENT_KEY_NAME,
     region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || null,
+    hasAwsAccessKey: Boolean(process.env.AWS_ACCESS_KEY_ID),
+    hasAwsSecretKey: Boolean(process.env.AWS_SECRET_ACCESS_KEY),
+    localFallbackEnabled: LOCAL_FALLBACK_ENABLED,
+    cwd: process.cwd(),
+    serverDir: __dirname,
     profile: normalizeProfile(student),
     topLevelKeys: Object.keys(student || {}).filter(key => !key.startsWith("__"))
   });
