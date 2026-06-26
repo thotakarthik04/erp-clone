@@ -6,6 +6,7 @@ const fs = require("fs");
 
 const dynamo = require("./dynamo");
 const {
+  GetCommand,
   ScanCommand
 } = require("@aws-sdk/lib-dynamodb");
 
@@ -41,39 +42,54 @@ app.use(express.static(path.join(__dirname, "..", "src")));
 
 async function getStudent(studentId) {
   if (!process.env.AWS_REGION && !process.env.AWS_DEFAULT_REGION) {
-    return readDB();
+    const fallback = readDB();
+    fallback.__source = "local-db-no-region";
+    return fallback;
   }
 
   try {
-    const scanOptions = studentId
-      ? {
+    if (studentId) {
+      const result = await dynamo.send(
+        new GetCommand({
           TableName: STUDENTS_TABLE,
-          FilterExpression:
-            "#profile.#id = :studentId OR #id = :studentId OR #studentId = :studentId",
-          ExpressionAttributeNames: {
-            "#profile": "profile",
-            "#id": "id",
-            "#studentId": "studentId"
-          },
-          ExpressionAttributeValues: {
-            ":studentId": studentId
+          Key: {
+            studentId: String(studentId)
           }
-        }
-      : {
-          TableName: STUDENTS_TABLE,
-          Limit: 1
-        };
+        })
+      );
 
-    const result = await dynamo.send(new ScanCommand(scanOptions));
+      if (result.Item) {
+        result.Item.__source = "dynamodb-get";
+        return result.Item;
+      }
 
-    if (!result.Items || result.Items.length === 0) {
-      return readDB();
+      console.warn(`DynamoDB item not found for studentId=${studentId}`);
+      const fallback = readDB();
+      fallback.__source = "local-db-item-not-found";
+      return fallback;
     }
 
+    const result = await dynamo.send(
+      new ScanCommand({
+        TableName: STUDENTS_TABLE,
+        Limit: 1
+      })
+    );
+
+    if (!result.Items || result.Items.length === 0) {
+      const fallback = readDB();
+      fallback.__source = "local-db-empty-table";
+      return fallback;
+    }
+
+    result.Items[0].__source = "dynamodb-scan";
     return result.Items[0];
   } catch (err) {
     console.error("DynamoDB Error:", err);
-    return readDB();
+    const fallback = readDB();
+    fallback.__source = "local-db-dynamodb-error";
+    fallback.__error = err?.name || err?.code || err?.message || "DynamoDB error";
+    return fallback;
   }
 }
 
@@ -293,6 +309,21 @@ app.get("/api/results", async (req, res) => {
   const student = await getStudent(req.query.id);
 
   res.json(normalizeResults(student));
+});
+
+// Deployment/debug helper: no secrets, only tells where data came from.
+app.get("/api/debug/student", async (req, res) => {
+  const student = await getStudent(req.query.id);
+
+  res.json({
+    requestedId: req.query.id || null,
+    source: student?.__source || "unknown",
+    error: student?.__error || null,
+    table: STUDENTS_TABLE,
+    region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || null,
+    profile: normalizeProfile(student),
+    topLevelKeys: Object.keys(student || {}).filter(key => !key.startsWith("__"))
+  });
 });
 
 // -----------------------------------
