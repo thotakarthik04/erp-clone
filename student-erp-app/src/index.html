@@ -402,8 +402,9 @@
 }
 
 .splash-logo{
-  width:110px;
-  height:110px;
+  width:135px;
+  height:135px;
+  object-fit:contain;
   animation:pulse 1.5s infinite;
 }
 
@@ -540,10 +541,10 @@
 
 /* ===== Added application pages ===== */
 .page-header{
-  min-height:72px;
-  padding:14px 18px;
+  min-height:64px;
+  padding:10px 16px;
   display:grid;
-  grid-template-columns:90px 1fr 90px;
+  grid-template-columns:76px 1fr 76px;
   align-items:center;
   position:sticky;
   top:0;
@@ -556,7 +557,7 @@
   margin:0;
   grid-column:2;
   text-align:center;
-  font-size:21px;
+  font-size:20px;
   font-weight:400;
   letter-spacing:.2px;
 }
@@ -582,17 +583,17 @@
   line-height:1;
 }
 .results-summary{
-  min-height:286px;
-  padding:42px 20px 36px;
+  min-height:238px;
+  padding:32px 20px 28px;
   text-align:center;
   background:linear-gradient(100deg,#ff7b70 0%,#ffb06c 55%,#ffdc73 100%);
-  border-radius:0 0 28px 28px;
+  border-radius:0 0 24px 24px;
   box-shadow:0 2px 7px rgba(0,0,0,.18);
 }
 .large-ring{
-  width:140px;
-  height:140px;
-  margin:0 auto 72px;
+  width:118px;
+  height:118px;
+  margin:0 auto 52px;
   position:relative;
 }
 .large-ring svg{ transform:rotate(-90deg); }
@@ -602,13 +603,13 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:25px;
+  font-size:22px;
   color:var(--text-dark);
   font-weight:300;
 }
 .summary-title{
   margin:0;
-  font-size:24px;
+  font-size:22px;
   font-weight:300;
   color:#282828;
 }
@@ -616,12 +617,12 @@
   display:none;
 }
 .semester-list{
-  padding:52px 30px 40px;
+  padding:36px 28px 36px;
 }
 #semesterList{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:22px 18px;
+  gap:18px 16px;
   align-items:start;
 }
 .attendance-subjects{
@@ -638,7 +639,7 @@
 }
 .semester-card{
   width:100%;
-  min-height:176px;
+  min-height:154px;
   margin:0;
   padding:0;
   overflow:hidden;
@@ -650,26 +651,26 @@
   cursor:pointer;
 }
 .semester-card-head{
-  height:36px;
-  padding:7px 8px;
+  height:32px;
+  padding:6px 8px;
   display:block;
   background:#303030;
   color:#fff;
-  font-size:18px;
+  font-size:16px;
   font-weight:700;
   border-radius:4px 4px 0 0;
 }
 .semester-stats{
-  min-height:138px;
-  padding:22px 8px 16px;
+  min-height:120px;
+  padding:18px 8px 14px;
   display:flex;
   align-items:center;
   justify-content:center;
 }
 .semester-stat{ display:none; }
 .semester-ring{
-  width:94px;
-  height:94px;
+  width:84px;
+  height:84px;
   position:relative;
 }
 .semester-ring svg{ transform:rotate(-90deg); }
@@ -679,7 +680,7 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:17px;
+  font-size:15.5px;
   font-weight:300;
   color:#454545;
 }
@@ -888,7 +889,7 @@
 
 <!-- SPLASH SCREEN -->
 <div id="splashScreen" class="splash-screen">
-  <img src="images/logo.png" class="splash-logo" alt="Logo">
+  <img src="images/loading-logo.png" class="splash-logo" alt="Logo">
 </div>
 
 <!-- LOGIN SCREEN -->
@@ -1126,7 +1127,7 @@
     if(!el) return;
     const rawProgress = progressValue ?? parseFloat(el.dataset.pct) ?? 0;
     const pct = Math.max(0, Math.min(100, Number(rawProgress) || 0));
-    const size = el.classList.contains('large-ring') ? 140 : (el.classList.contains('semester-ring') ? 94 : (el.classList.contains('mini-ring') ? 78 : 84));
+    const size = el.classList.contains('large-ring') ? 118 : (el.classList.contains('semester-ring') ? 84 : (el.classList.contains('mini-ring') ? 78 : 84));
     const stroke = 7;
     const r = (size - stroke) / 2;
     const c = 2 * Math.PI * r;
@@ -1554,6 +1555,16 @@
    LOGIN SYSTEM
 ========================= */
 
+function showSplashLoader(duration, callback){
+  const splashScreen = document.getElementById("splashScreen");
+  splashScreen.style.display = "flex";
+
+  setTimeout(() => {
+    splashScreen.style.display = "none";
+    if(typeof callback === "function") callback();
+  }, duration);
+}
+
 function showDashboard(){
   document.getElementById("loginScreen").style.display="none";
   showScreen('dashboardScreen');
@@ -1612,7 +1623,7 @@ document
       id
     );
 
-    showDashboard();
+    showSplashLoader(2000, showDashboard);
 
   }else{
 
