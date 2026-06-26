@@ -147,10 +147,19 @@ async function getStudent(studentId) {
         );
       }
 
-      const scanned = await scanStudentById(
-        studentId,
-        getError ? "dynamodb-scan-after-get-error" : "dynamodb-scan-after-get-miss"
-      );
+      let scanned = null;
+
+      try {
+        scanned = await scanStudentById(
+          studentId,
+          getError ? "dynamodb-scan-after-get-error" : "dynamodb-scan-after-get-miss"
+        );
+      } catch (err) {
+        console.warn(
+          `DynamoDB scan lookup failed for studentId=${studentId}:`,
+          err?.name || err?.code || err?.message || err
+        );
+      }
 
       if (scanned) {
         return scanned;
