@@ -237,23 +237,31 @@
     position:relative;
     height:200px;
     margin-left:8px;
+    padding:0 12px;
   }
   .grid-line{
-    position:absolute; left:0; right:0; height:1px; background:#e7e7ea;
+    position:absolute; left:0; right:0; height:1px; background:#e7e7ea; z-index:1;
+  }
+  .result-bars{
+    position:absolute;
+    inset:0 12px 0 12px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:18px;
+    z-index:2;
   }
   .bar-wrap{
-    position:absolute;
-    bottom:0;
-    left:50%;
-    transform: translateX(-50%);
-    width:120px;
+    position:relative;
+    width:72px;
     height:100%;
     display:flex;
     flex-direction:column;
+    align-items:center;
     justify-content:flex-end;
   }
   .bar-track{
-    width:100%; height:100%;
+    width:100%; height:168px;
     background:#ececec;
     border-radius:3px 3px 0 0;
     position:relative;
@@ -267,6 +275,13 @@
     padding-top:10px;
     font-size:13.5px; font-weight:600; color:#3a2a1a;
     box-sizing:border-box;
+  }
+  .bar-term-label{
+    margin-top:6px;
+    font-size:12px;
+    color:var(--text-grey);
+    font-weight:600;
+    white-space:nowrap;
   }
   .chart-foot{ text-align:center; padding:14px 0 4px; }
   .chart-foot .term{ font-size:13.5px; color:var(--text-grey); display:block; }
@@ -409,12 +424,13 @@
   right:0;
   bottom:0;
   background:#fff;
-  overflow-y:auto;
+  overflow:hidden;
   overflow-x:hidden;
   z-index:9999;
 }
 .login-bg{
   min-height:100%;
+  padding:14px 0 12px;
   background:linear-gradient(
     180deg,
     #f58a7a 0%,
@@ -425,12 +441,12 @@
 
 .login-logo{
   display:block;
-  width:260px;
-  margin:20px auto 120px;
+  width:210px;
+  margin:12px auto 46px;
 }
 
 .login-form{
-  width:88%;
+  width:86%;
   max-width:420px;
   margin:auto;
 }
@@ -438,20 +454,28 @@
 .input-box{
   display:flex;
   align-items:center;
-  height:62px;
+  height:54px;
   background:#fff;
   border:1px solid #bdbdbd;
-  border-radius:14px;
-  margin-bottom:22px;
+  border-radius:12px;
+  margin-bottom:14px;
   overflow:hidden;
 }
 
 .input-icon{
-  width:60px;
-  text-align:center;
-  font-size:22px;
-  color:#ff8f7c;
-  border-right:1px solid #f0c4c4;
+  width:54px;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#9a9a9a;
+  border-right:1px solid #dedede;
+}
+
+.input-icon svg{
+  width:22px;
+  height:22px;
+  stroke:currentColor;
 }
 
 .login-input{
@@ -460,16 +484,16 @@
   outline:none;
   background:none;
   height:100%;
-  padding:0 15px;
-  font-size:18px;
+  padding:0 13px;
+  font-size:16px;
 }
 
 .login-btn{
   width:100%;
-  height: 64px;
+  height:56px;
   border:none;
   border-radius:8px;
-  margin-top:10px;
+  margin-top:6px;
   cursor:pointer;
 
   background:
@@ -479,7 +503,7 @@
     #f6d06e
   );
 
-  font-size:22px;
+  font-size:20px;
   color:#333;
   font-weight:500;
 
@@ -490,26 +514,28 @@
 .login-links{
   display:flex;
   justify-content:space-between;
-  margin-top:16px;
+  margin-top:12px;
 }
 
 .mini-btn{
   width:46%;
-  height:42px;
+  height:36px;
   background:#fff;
   border:1px solid #d7d7d7;
   border-radius:4px;
-  font-size:14px;
+  font-size:13px;
 }
 
 .naac-section{
-  margin-top:90px;
+  margin-top:34px;
   text-align:center;
 }
 
 .naac-img{
-  width:95%;
+  width:92%;
+  max-height:215px;
   max-width:450px;
+  object-fit:contain;
 }
 
 /* ===== Added application pages ===== */
@@ -875,7 +901,12 @@
     <div class="login-form">
 
       <div class="input-box">
-        <span class="input-icon">👤</span>
+        <span class="input-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21a8 8 0 0 0-16 0"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </span>
         <input
           type="text"
           id="studentId"
@@ -884,7 +915,12 @@
       </div>
 
       <div class="input-box">
-        <span class="input-icon">🔒</span>
+        <span class="input-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="11" width="14" height="10" rx="2"></rect>
+            <path d="M8 11V8a4 4 0 0 1 8 0v3"></path>
+          </svg>
+        </span>
         <input
           type="password"
           id="password"
@@ -968,15 +1004,11 @@
         <div class="chart-area">
           <div class="y-axis-label">Percentage</div>
           <div class="chart-plot" id="chartPlot">
-            <div class="bar-wrap">
-              <div class="bar-track">
-                <div class="bar-fill" id="resultBar">81.5%</div>
-              </div>
-            </div>
+            <div class="result-bars" id="resultBars"></div>
           </div>
         </div>
         <div class="chart-foot">
-          <span class="term">Term I</span>
+          <span class="term" id="chartTermLabel">Result Terms</span>
           <span class="label">Result Terms</span>
         </div>
       </div>
@@ -1088,7 +1120,7 @@
   <script>
   // Fetch data from backend API (configured in config.js) and populate UI
   const chartPlot = document.getElementById('chartPlot');
-  const resultBar = document.getElementById('resultBar');
+  const resultBars = document.getElementById('resultBars');
 
   function buildRing(el, progressValue, displayValue){
     if(!el) return;
@@ -1229,13 +1261,27 @@
     return descriptions[String(grade || '').toUpperCase()] || '';
   }
 
+  function getSafeAvatar(avatar){
+    return String(avatar || 'images/profile.jpg.png')
+      .replace(/\/images\/profile\.jpg($|\?)/, '/images/profile.jpg.png$1');
+  }
+
+  function setAvatarImage(element, avatar){
+    if(!element) return;
+    element.onerror = () => {
+      element.onerror = null;
+      element.src = 'images/profile.jpg.png';
+    };
+    element.src = getSafeAvatar(avatar);
+  }
+
   function applyProfile(profile){
     document.getElementById('profileName').textContent = profile.name || '';
     document.getElementById('profileId').textContent = profile.id || '';
     document.getElementById('profileCourse').textContent = profile.course || '';
     const avatar = profile.avatar || 'images/profile.jpg.png';
-    document.getElementById('profileAvatar').src = avatar;
-    document.getElementById('drawerAvatar').src = avatar;
+    setAvatarImage(document.getElementById('profileAvatar'), avatar);
+    setAvatarImage(document.getElementById('drawerAvatar'), avatar);
     document.getElementById('drawerName').textContent = profile.name || 'Student';
     document.getElementById('drawerStudentId').textContent = profile.id || '';
     document.getElementById('drawerCourse').textContent = profile.course || '';
@@ -1251,8 +1297,6 @@
     buildRing(dashboardRings[0], cgpa * 10, formatScore(cgpa));
     buildRing(dashboardRings[1], percentage, `${formatScore(percentage, 1)}%`);
     buildRing(dashboardRings[2], attendance, `${formatScore(attendance, 1)}%`);
-    resultBar.style.height = `${Math.max(0, Math.min(100, percentage))}%`;
-    resultBar.textContent = `${formatScore(percentage, 1)}%`;
     document.getElementById('feeBalance').textContent = stats.feeBalance ?? 'Nil';
   }
 
@@ -1263,6 +1307,46 @@
       values[1].textContent = drives.recent ?? 0;
       values[2].textContent = drives.selected ?? 0;
     }
+  }
+
+  function getResultChartTerms(){
+    const semesters = appData.results?.semesters || [];
+
+    if(semesters.length){
+      return semesters.map((semester, index) => {
+        const cgpaPercent = Number(semester.cgpa) ? Number(semester.cgpa) * 10 : 0;
+        const percentage = Number(semester.percentage) || cgpaPercent || Number(appData.stats.percentage) || 0;
+        return {
+          label: `Term ${toRoman(getSemesterNumber(semester.name, index))}`,
+          value: Math.max(0, Math.min(100, percentage))
+        };
+      });
+    }
+
+    return [{
+      label:'Term I',
+      value: Math.max(0, Math.min(100, Number(appData.stats.percentage) || 0))
+    }];
+  }
+
+  function renderResultChart(){
+    if(!resultBars) return;
+
+    const terms = getResultChartTerms();
+    resultBars.innerHTML = terms.map(term => `
+      <div class="bar-wrap">
+        <div class="bar-track">
+          <div class="bar-fill" style="height:${term.value}%">${formatScore(term.value, 1)}%</div>
+        </div>
+        <span class="bar-term-label">${escapeHtml(term.label)}</span>
+      </div>
+    `).join('');
+
+    document.getElementById('chartTermLabel').textContent = terms.length > 1
+      ? `${terms.length} Result Terms`
+      : terms[0]?.label || 'Result Terms';
+
+    requestAnimationFrame(buildChartGridlines);
   }
 
   function renderAttendance(){
@@ -1336,6 +1420,7 @@
     applyProfile(appData.profile);
     applyStats(appData.stats);
     applyDrives(appData.drives);
+    renderResultChart();
     renderAttendance();
     renderResults();
   }

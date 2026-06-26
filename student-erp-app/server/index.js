@@ -53,6 +53,12 @@ app.use((req, res, next) => {
 // Serve frontend
 app.use(express.static(path.join(__dirname, "..", "src")));
 
+// DynamoDB may contain /images/profile.jpg while the project asset is profile.jpg.png.
+// Keep this compatibility route so old avatar URLs still load.
+app.get("/images/profile.jpg", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "src", "images", "profile.jpg.png"));
+});
+
 // -----------------------------------
 // DynamoDB Helper
 // -----------------------------------
@@ -276,6 +282,14 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(number) ? number : fallback;
 }
 
+function normalizeAvatar(value) {
+  const avatar = firstValue(value);
+
+  if (!avatar) return "images/profile.jpg.png";
+
+  return String(avatar).replace(/\/images\/profile\.jpg($|\?)/, "/images/profile.jpg.png$1");
+}
+
 function normalizeProfile(student = {}) {
   return {
     name: firstValue(student.profile?.name, student.name, student.studentName),
@@ -287,7 +301,7 @@ function normalizeProfile(student = {}) {
       student.studentid
     ),
     course: firstValue(student.profile?.course, student.course, student.program),
-    avatar: firstValue(student.profile?.avatar, student.avatar, student.profileImage)
+    avatar: normalizeAvatar(firstValue(student.profile?.avatar, student.avatar, student.profileImage))
   };
 }
 
