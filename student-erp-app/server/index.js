@@ -15,6 +15,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, "db.json");
 const STUDENTS_TABLE = process.env.STUDENTS_TABLE || "Students";
+const STUDENT_KEY_NAME =
+  process.env.STUDENTS_PARTITION_KEY ||
+  process.env.STUDENT_PARTITION_KEY ||
+  "studentId";
 
 app.use(express.json());
 
@@ -41,6 +45,51 @@ app.use(express.static(path.join(__dirname, "..", "src")));
 // DynamoDB Helper
 // -----------------------------------
 
+async function scanStudentById(studentId, source) {
+  const idValue = String(studentId);
+  const idFields = Array.from(
+    new Set([
+      STUDENT_KEY_NAME,
+      "studentId",
+      "studentID",
+      "studentid",
+      "id"
+    ])
+  );
+
+  const names = {
+    "#profile": "profile",
+    "#profileId": "id"
+  };
+
+  const expressions = idFields.map((field, index) => {
+    const nameKey = `#id${index}`;
+    names[nameKey] = field;
+    return `${nameKey} = :studentId`;
+  });
+
+  expressions.push("#profile.#profileId = :studentId");
+
+  const result = await dynamo.send(
+    new ScanCommand({
+      TableName: STUDENTS_TABLE,
+      FilterExpression: expressions.join(" OR "),
+      ExpressionAttributeNames: names,
+      ExpressionAttributeValues: {
+        ":studentId": idValue
+      },
+      Limit: 1
+    })
+  );
+
+  if (result.Items && result.Items.length > 0) {
+    result.Items[0].__source = source;
+    return result.Items[0];
+  }
+
+  return null;
+}
+
 async function getStudent(studentId) {
   if (!process.env.AWS_REGION && !process.env.AWS_DEFAULT_REGION) {
     const fallback = readDB();
@@ -50,23 +99,45 @@ async function getStudent(studentId) {
 
   try {
     if (studentId) {
-      const result = await dynamo.send(
-        new GetCommand({
-          TableName: STUDENTS_TABLE,
-          Key: {
-            studentId: String(studentId)
-          }
-        })
+      let getError = null;
+
+      try {
+        const result = await dynamo.send(
+          new GetCommand({
+            TableName: STUDENTS_TABLE,
+            Key: {
+              [STUDENT_KEY_NAME]: String(studentId)
+            }
+          })
+        );
+
+        if (result.Item) {
+          result.Item.__source = "dynamodb-get";
+          return result.Item;
+        }
+      } catch (err) {
+        getError = err;
+        console.warn(
+          `DynamoDB direct lookup failed using key ${STUDENT_KEY_NAME}:`,
+          err?.name || err?.code || err?.message || err
+        );
+      }
+
+      const scanned = await scanStudentById(
+        studentId,
+        getError ? "dynamodb-scan-after-get-error" : "dynamodb-scan-after-get-miss"
       );
 
-      if (result.Item) {
-        result.Item.__source = "dynamodb-get";
-        return result.Item;
+      if (scanned) {
+        return scanned;
       }
 
       console.warn(`DynamoDB item not found for studentId=${studentId}`);
       const fallback = readDB();
       fallback.__source = "local-db-item-not-found";
+      if (getError) {
+        fallback.__error = getError?.name || getError?.code || getError?.message || "DynamoDB get error";
+      }
       return fallback;
     }
 
@@ -321,6 +392,7 @@ app.get("/api/debug/student", async (req, res) => {
     source: student?.__source || "unknown",
     error: student?.__error || null,
     table: STUDENTS_TABLE,
+    partitionKey: STUDENT_KEY_NAME,
     region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || null,
     profile: normalizeProfile(student),
     topLevelKeys: Object.keys(student || {}).filter(key => !key.startsWith("__"))
