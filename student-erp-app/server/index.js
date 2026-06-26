@@ -1,8 +1,9 @@
-require("dotenv").config();
-
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+const loadEnv = require("./loadEnv");
+
+loadEnv();
 
 const dynamo = require("./dynamo");
 const {

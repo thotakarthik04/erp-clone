@@ -1,7 +1,8 @@
-require("dotenv").config();
-
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+const loadEnv = require("./loadEnv");
+
+loadEnv();
 
 const config = {
   region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION
