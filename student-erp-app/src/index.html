@@ -1172,10 +1172,7 @@
 
   async function fetchJson(endpoint, fallback){
     try{
-      const savedStudentId = localStorage.getItem('studentId');
-      const separator = endpoint.includes('?') ? '&' : '?';
-      const studentQuery = savedStudentId ? `${separator}id=${encodeURIComponent(savedStudentId)}` : '';
-      const response = await fetch(CONFIG.API_BASE_URL + endpoint + studentQuery);
+      const response = await fetch(CONFIG.API_BASE_URL + endpoint);
       if(!response.ok) return fallback;
       const value = await response.json();
       return hasData(value) ? value : fallback;
