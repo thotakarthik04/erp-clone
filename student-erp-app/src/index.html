@@ -394,18 +394,51 @@
 .splash-screen{
   position:absolute;
   inset:0;
-  background:#9e9e9e;
+  background:linear-gradient(115deg,#ff7e73 0%,#ffb46f 54%,#ffdc75 100%);
   display:flex;
   justify-content:center;
   align-items:center;
   z-index:99999;
+  transition:background .2s ease;
+}
+
+.splash-screen.action-loading{
+  background:#8e8e8c;
+}
+
+.splash-mark{
+  width:92px;
+  height:92px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.78);
+  box-shadow:
+    0 0 0 18px rgba(255,255,255,.12),
+    0 0 0 36px rgba(255,255,255,.08),
+    0 0 0 55px rgba(255,255,255,.045),
+    0 14px 30px rgba(176,90,50,.22);
+  animation:pulse 1.5s infinite;
+  transition:width .2s ease,height .2s ease,box-shadow .2s ease,background .2s ease;
+}
+
+.splash-screen.action-loading .splash-mark{
+  width:46px;
+  height:46px;
+  background:rgba(255,255,255,.92);
+  box-shadow:none;
 }
 
 .splash-logo{
-  width:135px;
-  height:135px;
+  width:63px;
+  height:63px;
   object-fit:contain;
-  animation:pulse 1.5s infinite;
+}
+
+.splash-screen.action-loading .splash-logo{
+  width:33px;
+  height:33px;
 }
 
 @keyframes pulse{
@@ -889,7 +922,9 @@
 
 <!-- SPLASH SCREEN -->
 <div id="splashScreen" class="splash-screen">
-  <img src="images/loading-logo.png" class="splash-logo" alt="Logo">
+  <div class="splash-mark">
+    <img src="images/loading-logo.png" class="splash-logo" alt="Logo">
+  </div>
 </div>
 
 <!-- LOGIN SCREEN -->
@@ -1555,12 +1590,14 @@
    LOGIN SYSTEM
 ========================= */
 
-function showSplashLoader(duration, callback){
+function showSplashLoader(duration, callback, mode='action'){
   const splashScreen = document.getElementById("splashScreen");
+  splashScreen.classList.toggle('action-loading', mode === 'action');
   splashScreen.style.display = "flex";
 
   setTimeout(() => {
     splashScreen.style.display = "none";
+    splashScreen.classList.remove('action-loading');
     if(typeof callback === "function") callback();
   }, duration);
 }
@@ -1576,7 +1613,9 @@ window.addEventListener("load",()=>{
 
   setTimeout(()=>{
 
-    document.getElementById("splashScreen").style.display="none";
+    const splashScreen = document.getElementById("splashScreen");
+    splashScreen.style.display="none";
+    splashScreen.classList.remove('action-loading');
 
     const loggedIn =
       localStorage.getItem("loggedIn");
@@ -1623,7 +1662,7 @@ document
       id
     );
 
-    showSplashLoader(2000, showDashboard);
+    showSplashLoader(2000, showDashboard, 'action');
 
   }else{
 
