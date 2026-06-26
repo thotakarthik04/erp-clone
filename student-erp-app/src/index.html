@@ -1172,7 +1172,11 @@
 
   async function fetchJson(endpoint, fallback){
     try{
-      const response = await fetch(CONFIG.API_BASE_URL + endpoint);
+      const cacheBuster = endpoint.includes('?') ? '&' : '?';
+      const response = await fetch(
+        `${CONFIG.API_BASE_URL}${endpoint}${cacheBuster}_=${Date.now()}`,
+        { cache: 'no-store' }
+      );
       if(!response.ok) return fallback;
       const value = await response.json();
       return hasData(value) ? value : fallback;

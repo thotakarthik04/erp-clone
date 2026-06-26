@@ -22,6 +22,14 @@ const STUDENT_KEY_NAME =
 
 app.use(express.json());
 
+// Avoid stale frontend/API responses during deployment.
+app.use((req, res, next) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
+
 // CORS
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -90,6 +98,22 @@ async function scanStudentById(studentId, source) {
   return null;
 }
 
+async function scanFirstStudent(source) {
+  const result = await dynamo.send(
+    new ScanCommand({
+      TableName: STUDENTS_TABLE,
+      Limit: 1
+    })
+  );
+
+  if (result.Items && result.Items.length > 0) {
+    result.Items[0].__source = source;
+    return result.Items[0];
+  }
+
+  return null;
+}
+
 async function getStudent(studentId) {
   if (!process.env.AWS_REGION && !process.env.AWS_DEFAULT_REGION) {
     const fallback = readDB();
@@ -133,6 +157,12 @@ async function getStudent(studentId) {
       }
 
       console.warn(`DynamoDB item not found for studentId=${studentId}`);
+      const firstStudent = await scanFirstStudent("dynamodb-scan-after-id-not-found");
+
+      if (firstStudent) {
+        return firstStudent;
+      }
+
       const fallback = readDB();
       fallback.__source = "local-db-item-not-found";
       if (getError) {
@@ -141,21 +171,15 @@ async function getStudent(studentId) {
       return fallback;
     }
 
-    const result = await dynamo.send(
-      new ScanCommand({
-        TableName: STUDENTS_TABLE,
-        Limit: 1
-      })
-    );
+    const firstStudent = await scanFirstStudent("dynamodb-scan");
 
-    if (!result.Items || result.Items.length === 0) {
+    if (!firstStudent) {
       const fallback = readDB();
       fallback.__source = "local-db-empty-table";
       return fallback;
     }
 
-    result.Items[0].__source = "dynamodb-scan";
-    return result.Items[0];
+    return firstStudent;
   } catch (err) {
     console.error("DynamoDB Error:", err);
     const fallback = readDB();
@@ -187,7 +211,13 @@ function toNumber(value, fallback = 0) {
 function normalizeProfile(student = {}) {
   return {
     name: firstValue(student.profile?.name, student.name, student.studentName),
-    id: firstValue(student.profile?.id, student.id, student.studentId),
+    id: firstValue(
+      student.profile?.id,
+      student.id,
+      student.studentId,
+      student.studentID,
+      student.studentid
+    ),
     course: firstValue(student.profile?.course, student.course, student.program),
     avatar: firstValue(student.profile?.avatar, student.avatar, student.profileImage)
   };
