@@ -282,6 +282,17 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(number) ? number : fallback;
 }
 
+function toPercentage(value, fallbackCgpa = 0, fallback = 0) {
+  const number = toNumber(value, NaN);
+
+  if (Number.isFinite(number)) {
+    return number > 0 && number <= 10 ? number * 10 : number;
+  }
+
+  const cgpa = toNumber(fallbackCgpa, 0);
+  return cgpa > 0 ? cgpa * 10 : fallback;
+}
+
 function normalizeAvatar(value) {
   const avatar = firstValue(value);
 
@@ -350,6 +361,7 @@ function normalizeStats(student = {}) {
   const computedAttendance = courses.length
     ? courses.reduce((sum, course) => sum + toNumber(course.pct), 0) / courses.length
     : undefined;
+  const cgpa = toNumber(firstValue(student.stats?.cgpa, student.cgpa, student.results?.overall?.cgpa), 0);
 
   return {
     attendance: toNumber(
@@ -362,9 +374,10 @@ function normalizeStats(student = {}) {
       ),
       0
     ),
-    cgpa: toNumber(firstValue(student.stats?.cgpa, student.cgpa, student.results?.overall?.cgpa), 0),
-    percentage: toNumber(
+    cgpa,
+    percentage: toPercentage(
       firstValue(student.stats?.percentage, student.percentage, student.results?.overall?.percentage),
+      cgpa,
       0
     ),
     feeBalance: firstValue(student.stats?.feeBalance, student.feeBalance, "Nil")
@@ -396,7 +409,7 @@ function groupSubjectsIntoSemesters(subjects = []) {
       map.set(key, {
         name: `Semester ${semesterNumber}`,
         cgpa: firstValue(subject.cgpa, subject.tgpa, 0),
-        percentage: firstValue(subject.percentage, 0),
+        percentage: toPercentage(subject.percentage, firstValue(subject.cgpa, subject.tgpa, 0), 0),
         subjects: []
       });
     }
@@ -404,7 +417,11 @@ function groupSubjectsIntoSemesters(subjects = []) {
     const semester = map.get(key);
     semester.subjects.push(normalizeSubject(subject));
     semester.cgpa = firstValue(subject.cgpa, subject.tgpa, semester.cgpa);
-    semester.percentage = firstValue(subject.percentage, semester.percentage);
+    semester.percentage = toPercentage(
+      firstValue(subject.percentage, semester.percentage),
+      semester.cgpa,
+      semester.percentage
+    );
   });
 
   return Array.from(map.values());
@@ -414,20 +431,25 @@ function normalizeResults(student = {}) {
   const rawSemesters = getRawSemesters(student);
   const rawSubjects = asArray(firstValue(student.results?.subjects, student.subjects, student.grades));
   const semesters = rawSemesters.length
-    ? rawSemesters.map((semester, index) => ({
-        name: firstValue(semester.name, semester.semesterName, `Semester ${firstValue(semester.semester, semester.sem, index + 1)}`),
-        cgpa: toNumber(firstValue(semester.cgpa, semester.tgpa), 0),
-        percentage: toNumber(firstValue(semester.percentage, semester.percent), 0),
-        subjects: asArray(semester.subjects).map(normalizeSubject)
-      }))
+    ? rawSemesters.map((semester, index) => {
+        const cgpa = toNumber(firstValue(semester.cgpa, semester.tgpa), 0);
+
+        return {
+          name: firstValue(semester.name, semester.semesterName, `Semester ${firstValue(semester.semester, semester.sem, index + 1)}`),
+          cgpa,
+          percentage: toPercentage(firstValue(semester.percentage, semester.percent), cgpa, 0),
+          subjects: asArray(semester.subjects).map(normalizeSubject)
+        };
+      })
     : groupSubjectsIntoSemesters(rawSubjects);
 
   const stats = normalizeStats(student);
   return {
     overall: {
       cgpa: toNumber(firstValue(student.results?.overall?.cgpa, student.overallCgpa, stats.cgpa), 0),
-      percentage: toNumber(
+      percentage: toPercentage(
         firstValue(student.results?.overall?.percentage, student.overallPercentage, stats.percentage),
+        firstValue(student.results?.overall?.cgpa, student.overallCgpa, stats.cgpa),
         0
       )
     },

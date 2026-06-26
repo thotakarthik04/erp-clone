@@ -1315,7 +1315,8 @@
     if(semesters.length){
       return semesters.map((semester, index) => {
         const cgpaPercent = Number(semester.cgpa) ? Number(semester.cgpa) * 10 : 0;
-        const percentage = Number(semester.percentage) || cgpaPercent || Number(appData.stats.percentage) || 0;
+        const rawPercentage = Number(semester.percentage) || cgpaPercent || Number(appData.stats.percentage) || 0;
+        const percentage = rawPercentage > 0 && rawPercentage <= 10 ? rawPercentage * 10 : rawPercentage;
         return {
           label: `Term ${toRoman(getSemesterNumber(semester.name, index))}`,
           value: Math.max(0, Math.min(100, percentage))
